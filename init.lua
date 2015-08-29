@@ -6,11 +6,14 @@ else
 end
 for key,value in pairs(config) do print(key .. " = " .. value) end
 
+name = "temp" .. "-" .. wifi.ap.getmac()
+mqttClientID = name
+
 wifi.setmode(wifi.STATIONAP)
 
 cfg={}
-cfg.ssid= "temp" .. "-" .. wifi.ap.getmac()
-cfg.pwd= "password"
+cfg.ssid = name
+cfg.pwd = "password"
 cfg.beacon = 100
 cfg.auth = AUTH_OPEN
 wifi.ap.config(cfg)
@@ -69,9 +72,25 @@ sv:listen(80,function(c)
     c:send("<form method=\"POST\">")
     c:send("Wifi SSID: <input type=\"text\" name=\"ssid\" value=\"" .. default(config["ssid"], "") .. "\" /><br />")
     c:send("Wifi Password: <input type=\"text\" name=\"password\" value=\"" .. default(config["password"], "") .. "\" /><br />")
+    c:send("MQTT Host: <input type=\"text\" name=\"mqttHost\" value=\"" .. default(config["mqttHost"], "") .. "\" /><br />")
+    c:send("MQTT Port: <input type=\"text\" name=\"mqttPort\" value=\"" .. default(config["mqttPort"], "1883") .. "\" /><br />")
+    c:send("MQTT User: <input type=\"text\" name=\"mqttUser\" value=\"" .. default(config["mqttUser"], "") .. "\" /><br />")
+    c:send("MQTT Password: <input type=\"text\" name=\"mqttPassword\" value=\"" .. default(config["mqttPassword"], "") .. "\" /><br />")
     c:send("<input type=\"submit\" value=\"Save config\" />")
     c:send("</form>")
     c:send("</body>")
     c:close()
   end)
 end)
+
+if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
+  m = mqtt.Client(mqttClientID, 120, config["mqttUser"], config["mqttPassword"])
+  m:connect(config["mqttHost"], config["mqttPort"], 0, function(conn)
+     print("Connected to MQTT:" .. config["mqttHost"] .. ":" .. config["mqttPort"] .." as " .. mqttClientID )
+     tmr.alarm(0, 5000, 1, function()
+       print("reading temperature")
+       -- FIXME: Actually read temperature
+       conn:publish("/temp", tmr.now(), 0, 0, function(conn) print("sent") end)
+     end)
+  end)
+end
