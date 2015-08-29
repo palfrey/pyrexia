@@ -85,7 +85,8 @@ if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
      tmr.alarm(0, 5000, 1, function()
        print("reading temperature")
        -- FIXME: Actually read temperature
-       conn:publish("/temp", tmr.now(), 0, 0, function(conn) print("sent") end)
+       local msg = {temp = tmr.now(), id = name }
+       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
      end)
   end)
 end
