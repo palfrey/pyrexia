@@ -1,4 +1,4 @@
-configFile = "config.json"
+local configFile = "config.json"
 if file.open(configFile) then
   config = cjson.decode(file.read())
 else
@@ -6,12 +6,12 @@ else
 end
 for key,value in pairs(config) do print(key .. " = " .. value) end
 
-name = "temp" .. "-" .. wifi.ap.getmac()
-mqttClientID = name
+local name = "temp" .. "-" .. wifi.ap.getmac()
+local mqttClientID = name
 
 wifi.setmode(wifi.STATIONAP)
 
-cfg={}
+local cfg={}
 cfg.ssid = name
 cfg.pwd = "password"
 cfg.beacon = 100
@@ -32,7 +32,7 @@ if config["ssid"] ~= nil and config["password"] ~= nil then
   wifi.sta.config(config["ssid"], config["password"])
 end
 
-function default(value, d)
+local function default(value, d)
   if value == nil then
     return d
   else
@@ -79,7 +79,7 @@ sv:listen(80,function(c)
 end)
 
 if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
-  m = mqtt.Client(mqttClientID, 120, config["mqttUser"], config["mqttPassword"])
+  local m = mqtt.Client(mqttClientID, 120, config["mqttUser"], config["mqttPassword"])
   m:connect(config["mqttHost"], config["mqttPort"], 0, function(conn)
      print("Connected to MQTT:" .. config["mqttHost"] .. ":" .. config["mqttPort"] .." as " .. mqttClientID )
      tmr.alarm(0, 5000, 1, function()
