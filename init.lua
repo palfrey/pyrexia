@@ -30,11 +30,6 @@ if config["ssid"] ~= nil and config["password"] ~= nil then
   -- end)
   -- wifi.sta.eventMonStart()
   wifi.sta.config(config["ssid"], config["password"])
-  -- while wifi.sta.status() ~= 5 do
-  --   print(wifi.sta.status())
-  --   tmr.delay(100000)
-  -- end
-  print(wifi.sta.getip())
 end
 
 function default(value, d)
