@@ -1,0 +1,7 @@
+{
+	"host" : "bunny.cloudamqp.com",
+	"vhost" : "",
+	"user" : "",
+	"password" : "",
+	"port": 1883
+}

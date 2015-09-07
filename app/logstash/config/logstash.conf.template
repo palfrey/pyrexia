@@ -1,12 +1,12 @@
 input {
 	rabbitmq {
 		queue => "temp"
-		host => ""
-		vhost => ""
-		user => ""
-		password => ""
+		host => "{{ host }}"
+		vhost => "{{ vhost }}"
+		user => "{{ user }}"
+		password => "{{ password }}"
 		durable => "true"
-  }
+	}
 }
 
 output {

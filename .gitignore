@@ -1,2 +1,5 @@
 logstash.conf
 *.bin
+config.json
+app/create_msg.py
+ENV/
