@@ -78,15 +78,34 @@ sv:listen(80,function(c)
   end)
 end)
 
+function readTemp(pin)
+	status,temp,humi = dht.read(pin)
+	if( status == dht.OK ) then
+	  print("DHT Temperature:"..temp..";".."Humidity:"..humi)
+	elseif( status == dht.ERROR_CHECKSUM ) then
+	  print( "DHT Checksum error." );
+	elseif( status == dht.ERROR_TIMEOUT ) then
+	  print( "DHT Time out." );
+	else
+	  print("Something else")
+	  print(status)
+	end
+end
+
 if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
   local m = mqtt.Client(mqttClientID, 120, config["mqttUser"], config["mqttPassword"])
   m:connect(config["mqttHost"], config["mqttPort"], 0, function(conn)
      print("Connected to MQTT:" .. config["mqttHost"] .. ":" .. config["mqttPort"] .." as " .. mqttClientID )
      tmr.alarm(0, 5000, 1, function()
        print("reading temperature")
-       -- FIXME: Actually read temperature
-       local msg = {temp = tmr.now(), id = name }
-       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
+	   local status, temp, humid = dht.read(4)
+       if (status == dht.OK) then
+		   print("Got temperature " .. temp .. " and humidity " .. humid)
+	       local msg = {temp = temp, humid = humid, id = name }
+	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
+	   else
+		   print("Error status of temp sensor: " .. status)
+	   end
      end)
   end)
 end
