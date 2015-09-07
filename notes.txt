@@ -1,0 +1,13 @@
+https://github.com/nodemcu/nodemcu-firmware/wiki/nodemcu_api_en
+
+https://github.com/kmpm/nodemcu-uploader
+./nodemcu-uploader.py --port /dev/tty.wchusbserial1410 upload ../init.lua:init.lua -r
+./nodemcu-uploader.py --port /dev/tty.wchusbserial1410 upload config.json
+./nodemcu-uploader.py --port /dev/tty.wchusbserial1410 download config.json
+
+https://github.com/themadinventor/esptool
+./esptool.py --baud 230400 --port /dev/tty.wchusbserial1410 write_flash 0x0000 ../nodemcu-master-10-modules-2015-08-24-12-01-15-float.bin
+
+http://lb9mg.no/2015/05/30/first-steps-with-nodemcu/
+https://learn.adafruit.com/dht/connecting-to-a-dhtxx-sensor
+https://github.com/nodemcu/nodemcu-flasher

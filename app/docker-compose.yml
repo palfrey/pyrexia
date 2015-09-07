@@ -1,0 +1,11 @@
+elasticsearch:
+  build: elasticsearch/
+  ports:
+    - "9200:9200"
+logstash:
+  image: logstash:latest
+  command: logstash -f /etc/logstash/conf.d/logstash.conf
+  volumes:
+    - ./logstash/config:/etc/logstash/conf.d
+  links:
+    - elasticsearch

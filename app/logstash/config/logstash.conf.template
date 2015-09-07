@@ -1,0 +1,16 @@
+input {
+	rabbitmq {
+		queue => "temp"
+		host => ""
+		vhost => ""
+		user => ""
+		password => ""
+		durable => "true"
+  }
+}
+
+output {
+	elasticsearch {
+		index => "temperature-%{+YYYY.MM.dd}"
+	}
+}
