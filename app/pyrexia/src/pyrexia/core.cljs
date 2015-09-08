@@ -1,5 +1,6 @@
 (ns ^:figwheel-always pyrexia.core
     (:require
+        [clojure.walk :refer [keywordize-keys]]
         [goog.Timer :as timer]
         [goog.events :as events]
         [cognitect.transit :as t])
@@ -10,6 +11,7 @@
 
 (defonce app-state (atom {
     :nodes []
+    :timer nil
 }))
 
 (def r (t/reader :json))
@@ -33,17 +35,18 @@
        (send "http://localhost:9200/temperature-2015.09.08/_search" "POST" payload))))
 
 (defn fetch-events []
-    (retrieve search-query #() #() ))
+    (retrieve search-query #(.log js/console (-> % keywordize-keys :aggregations :group_by_state :buckets pr-str)) #() ))
 
 (defn poll
   []
-  (let [timer (goog.Timer. 24000)]
-    (do (fetch-events)
+  (let [timer (goog.Timer. 5000)]
+    (do
+        (fetch-events)
         (. timer (start))
+        (swap! app-state assoc :timer timer)
         (events/listen timer goog.Timer/TICK fetch-events))))
 
-(defn start-app
-  []
-  (do (poll))
+(if (-> (:timer @app-state) nil? not)
+    (.stop (:timer @app-state))
 )
-(start-app)
+(poll)
