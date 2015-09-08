@@ -1,0 +1,17 @@
+/* PUT _template/template_1 */
+{
+  "template": "temperature-*",
+  "settings": {
+    "number_of_shards": 5
+  },
+  "mappings": {
+    "logs": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "index": "not_analyzed"
+        }
+      }
+    }
+  }
+}
