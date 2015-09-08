@@ -1,4 +1,3 @@
-/* PUT _template/template_1 */
 {
   "template": "temperature-*",
   "settings": {

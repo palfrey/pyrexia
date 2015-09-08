@@ -11,3 +11,6 @@ https://github.com/themadinventor/esptool
 http://lb9mg.no/2015/05/30/first-steps-with-nodemcu/
 https://learn.adafruit.com/dht/connecting-to-a-dhtxx-sensor
 https://github.com/nodemcu/nodemcu-flasher
+
+GET temperature-2015.09.08/_mappings
+POST temperature-2015.09.08/_search

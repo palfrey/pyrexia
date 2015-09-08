@@ -1,5 +1,8 @@
 elasticsearch:
   build: elasticsearch/
+  volumes:
+    - ./elasticsearch/config:/usr/share/elasticsearch/config
+    - ./elasticsearch/data:/usr/share/elasticsearch/data
   ports:
     - "9200:9200"
 logstash:
