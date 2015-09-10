@@ -3,7 +3,10 @@
         [clojure.walk :refer [keywordize-keys]]
         [goog.Timer :as timer]
         [goog.events :as events]
-        [cognitect.transit :as t])
+        [cognitect.transit :as t]
+        [om.core :as om]
+        [om.dom :as dom]
+    )
     (:import  [goog.net XhrIo])
 )
 
@@ -34,8 +37,18 @@
      (. xhr
        (send "http://localhost:9200/temperature-2015.09.08/_search" "POST" payload))))
 
+(defn parse-nodes [node-data]
+    (let [
+        buckets (-> node-data :aggregations :group_by_state :buckets)
+        nodes (apply merge (map #(hash-map (:key %) (-> % :top_tag_hits :hits :hits first :_source)) buckets))
+    ]
+        (.log js/console (pr-str nodes))
+        (swap! app-state assoc :nodes nodes)
+    )
+)
+
 (defn fetch-events []
-    (retrieve search-query #(.log js/console (-> % keywordize-keys :aggregations :group_by_state :buckets pr-str)) #() ))
+    (retrieve search-query #(parse-nodes (-> % keywordize-keys )) #() ))
 
 (defn poll
   []
@@ -50,3 +63,23 @@
     (.stop (:timer @app-state))
 )
 (poll)
+
+(defn sensor-view [sensor owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/li nil (first sensor)
+        (apply dom/ul nil (map
+            #(dom/li nil (-> % first name) " : " (-> % second))
+            (select-keys (second sensor) [:temp :humid (keyword "@timestamp")])
+        ))))))
+
+(defn sensors-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+        (apply dom/ul nil
+          (om/build-all sensor-view (:nodes data))))))
+
+(om/root sensors-view app-state
+  {:target (. js/document (getElementById "sensors"))})
