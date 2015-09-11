@@ -8,7 +8,8 @@
                  [org.clojure/clojurescript "1.7.122"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [com.cognitect/transit-cljs "0.8.225"]
-                 [org.omcljs/om "0.9.0"]]
+                 [org.omcljs/om "0.9.0"]
+                 [environ "1.0.1"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.3.9"]]
