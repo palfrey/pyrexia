@@ -36,7 +36,7 @@
        (fn [e]
          (callback (t/read r (.getResponseText xhr)))))
      (. xhr
-       (send (str "http://" (cljs-env :es-host) ":9200/temperature-2015.09.08/_search") "POST" payload))))
+       (send (str "http://" (cljs-env :es-host "localhost") ":9200/temperature-2015.09.08/_search") "POST" payload))))
 
 (defn parse-nodes [node-data]
     (let [
