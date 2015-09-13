@@ -6,6 +6,8 @@
         [cognitect.transit :as t]
         [om.core :as om]
         [om.dom :as dom]
+		[cljs-time.core :as time]
+		[cljs-time.format :as tf]
     )
     (:require-macros [pyrexia.env :as env :refer [cljs-env]])
     (:import [goog.net XhrIo])
@@ -29,27 +31,36 @@
 
 (def search-query "{\"size\":0,\"aggs\":{\"group_by_state\":{\"terms\":{\"field\":\"id\"},\"aggs\":{\"top_tag_hits\":{\"top_hits\":{\"sort\":[{\"@timestamp\":{\"order\":\"desc\"}}],\"size\":1}}}}}}")
 
+(def logstashFormatter (tf/formatter "yyyy.MM.dd"))
+(defn logName [date]
+	(str "temperature-" (tf/unparse logstashFormatter date))
+)
+
 (defn retrieve
-  [payload callback error-callback]
+  [log payload callback error-callback]
   (let [xhr (XhrIo.)]
      (events/listen xhr goog.net.EventType.COMPLETE
        (fn [e]
          (callback (t/read r (.getResponseText xhr)))))
      (. xhr
-       (send (str "http://" (cljs-env :es-host "localhost") ":9200/temperature-2015.09.08/_search") "POST" payload))))
+       (send (str "http://" (cljs-env :es-host "localhost") ":9200/" log "/_search") "POST" payload))
+	   ))
 
-(defn parse-nodes [node-data]
+(defn parse-nodes [node-data node-key]
     (let [
         buckets (-> node-data :aggregations :group_by_state :buckets)
         nodes (apply merge (map #(hash-map (:key %) (-> % :top_tag_hits :hits :hits first :_source)) buckets))
     ]
         (.log js/console (pr-str nodes))
-        (swap! app-state assoc :nodes nodes)
+        (swap! app-state assoc node-key nodes)
+		(swap! app-state assoc :nodes (merge (:old-nodes @app-state) (:new-nodes @app-state)))
     )
 )
 
 (defn fetch-events []
-    (retrieve search-query #(parse-nodes (-> % keywordize-keys )) #() ))
+    (retrieve (logName (time/now)) search-query #(parse-nodes (-> % keywordize-keys ) :new-nodes) #() )
+    (retrieve (-> (time/now) (time/minus (time/days 1)) logName) search-query #(parse-nodes (-> % keywordize-keys ) :old-nodes) #() )
+)
 
 (defn poll
   []
