@@ -11,13 +11,19 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
 	<!-- Latest compiled and minified JavaScript -->
+	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </head>
   <body>
     <div class="container-fluid">
-      <h2>Temperature</h2>
-      <div id="sensors"></div>
-    </div>
+		<div class="page-header">
+			<h1>Temperature</h1>
+		</div>
+		<div class="row">
+	      <div id="sensors" class="col-md-4"></div>
+		  <canvas id="map" class="col-md-8" style="border: 1px solid #000000;"></canvas>
+	    </div>
+	</div>
     <script src="js/compiled/pyrexia.js" type="text/javascript"></script>
   </body>
 </html>

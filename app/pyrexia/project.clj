@@ -10,7 +10,8 @@
                  [com.cognitect/transit-cljs "0.8.225"]
                  [org.omcljs/om "0.9.0"]
                  [environ "1.0.1"]
-				 [com.andrewmcveigh/cljs-time "0.3.13"]]
+				 [com.andrewmcveigh/cljs-time "0.3.13"]
+				 [rm-hull/monet "0.2.2"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.3.9"]]
@@ -63,7 +64,7 @@
              ;; :open-file-command "myfile-opener"
 
              ;; if you want to disable the REPL
-             ;; :repl false
+             :repl false
 
              ;; to configure a different figwheel logfile path
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
