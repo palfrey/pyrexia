@@ -21,7 +21,10 @@
     :nodes []
     :timer nil
 	:map (js/Image.)
-	:locations {"temp-1a:fe:34:fa:b2:bf" [100 100]}
+	:locations {
+        "temp-1a:fe:34:fa:b2:af" [50 50]
+        "temp-1a:fe:34:fa:b2:bf" [100 100]
+    }
 }))
 
 (def r (t/reader :json))
