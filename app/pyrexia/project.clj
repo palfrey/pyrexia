@@ -10,36 +10,39 @@
                  [com.cognitect/transit-cljs "0.8.225"]
                  [org.omcljs/om "0.9.0"]
                  [environ "1.0.1"]
-				 [com.andrewmcveigh/cljs-time "0.3.13"]
-				 [rm-hull/monet "0.2.2"]]
+                 [com.andrewmcveigh/cljs-time "0.3.13"]
+                 [rm-hull/monet "0.2.2"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
-            [lein-figwheel "0.3.9"]]
+            [lein-figwheel "0.3.9"]
+            [lein-cljfmt "0.3.0"]
+            [lein-auto "0.1.2"]]
 
   :source-paths ["src"]
 
+  :aliases {"format" ["auto" "do" ["cljfmt" "fix"] ["cljfmt" "fix" "project.clj"]]}
+  :auto {:default {:paths ["."]}}
+
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
-  :cljsbuild {
-    :builds [{:id "dev"
-              :source-paths ["src"]
+  :cljsbuild {:builds [{:id "dev"
+                        :source-paths ["src"]
 
-              :figwheel { :on-jsload "pyrexia.core/on-js-reload" }
+                        :figwheel {:on-jsload "pyrexia.core/on-js-reload"}
 
-              :compiler {:main pyrexia.core
-                         :asset-path "js/compiled/out"
-                         :output-to "resources/public/js/compiled/pyrexia.js"
-                         :output-dir "resources/public/js/compiled/out"
-                         :source-map-timestamp true }}
-             {:id "min"
-              :source-paths ["src"]
-              :compiler {:output-to "resources/public/js/compiled/pyrexia.js"
-                         :main pyrexia.core
-                         :optimizations :advanced
-                         :pretty-print false}}]}
+                        :compiler {:main pyrexia.core
+                                   :asset-path "js/compiled/out"
+                                   :output-to "resources/public/js/compiled/pyrexia.js"
+                                   :output-dir "resources/public/js/compiled/out"
+                                   :source-map-timestamp true}}
+                       {:id "min"
+                        :source-paths ["src"]
+                        :compiler {:output-to "resources/public/js/compiled/pyrexia.js"
+                                   :main pyrexia.core
+                                   :optimizations :advanced
+                                   :pretty-print false}}]}
 
-  :figwheel {
-             ;; :http-server-root "public" ;; default and assumes "resources"
+  :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
              ;; :server-ip "127.0.0.1"
 
@@ -68,4 +71,4 @@
 
              ;; to configure a different figwheel logfile path
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
-             })
+})
