@@ -50,6 +50,80 @@
        (send (str "http://" (cljs-env :es-host "localhost") ":9200/" log "/_search") "POST" payload))
 	   ))
 
+(defn contains [coll key]
+	(not (not-any? #(= % key) coll))
+)
+
+(defn weighted-average [values]
+	(let [
+			distances (seq (map :distance values))
+			weights (map #(/ 1 (+ % 1)) distances)
+			weightTotal (apply + weights)
+			weightedValues (map #(/ (:value %) (+ 1 (:distance %))) values)
+			weightedSum (apply + weightedValues)
+		]
+		(.log js/console "wa" weightedSum weightTotal (/ weightedSum weightTotal))
+		(/ weightedSum weightTotal)
+	)
+)
+
+(defn temp-for-locations [boxWidth boxHeight]
+	(let [
+		locations (:locations @app-state)
+		nodes (:nodes @app-state)
+	]
+		(.log js/console "tl-beg" (keys locations) (keys nodes) (keys @app-state))
+		(for [
+				node (keys locations)
+				:when (contains (keys nodes) node)
+				:let [
+					location (get locations node)
+					data (get nodes node)
+				]
+			]
+			(do
+				(.log js/console "tl" location data)
+				{:location location :temp (:temp data)}
+			)
+		)
+	)
+)
+
+(defn rangeValues [node x y]
+	{:value (:temp node) :distance (Math/sqrt (+
+		(Math/pow (- (-> node :location first) x) 2.0)
+		(Math/pow (- (-> node :location second) y) 2.0)))}
+)
+
+(defn draw-map [canvas mapImage]
+	(set! (.-width canvas) (.-width mapImage))
+	(set! (.-height canvas) (.-height mapImage))
+	(let [
+		context (.getContext canvas "2d")
+		gridSize 2
+		boxWidth (/ (.-width canvas) gridSize)
+		boxHeight (/ (.-height canvas) gridSize)
+		values (-> (:nodes @app-state) vals)
+		temp (-> (temp-for-locations boxWidth boxHeight) seq)
+		grid (apply merge (for
+			[x (range gridSize) y (range gridSize)]
+			{[x y] (weighted-average (map #(rangeValues % x y) temp))}
+		))
+		minTemp (apply min (vals grid))
+		maxTemp (apply max (vals grid))
+		]
+		(.drawImage context mapImage 0 0)
+		(.log js/console "max" minTemp maxTemp)
+		(.fillRect context 0 0 boxWidth boxHeight)
+		(set! (.-fillStyle context) "#ff0000")
+		(set! (.-globalAlpha context) .5)
+		(.log js/console context)
+		(.fillRect context 100 100 10 10)
+	)
+)
+
+(def canvas-dom (.getElementById js/document "map"))
+
 (defn parse-nodes [node-data node-key]
     (let [
         buckets (-> node-data :aggregations :group_by_state :buckets)
@@ -58,6 +132,7 @@
         (.log js/console "nodes" (pr-str nodes))
         (swap! app-state assoc node-key nodes)
 		(swap! app-state assoc :nodes (merge (:old-nodes @app-state) (:new-nodes @app-state)))
+		(draw-map canvas-dom (:map @app-state))
     )
 )
 
@@ -108,18 +183,6 @@
 
 (om/root sensors-view app-state
   {:target (. js/document (getElementById "sensors"))})
-
-(defn draw-map [canvas mapImage]
-	(set! (.-width canvas) (.-width mapImage))
-	(set! (.-height canvas) (.-height mapImage))
-	(let [context (.getContext canvas "2d")]
-		(.drawImage context mapImage 0 0)
-		(set! (.-fillStyle context) "#ff0000")
-		(.fillRect context 100 100 10 10)
-	)
-)
-
-(def canvas-dom (.getElementById js/document "map"))
 
 (defn map-image []
 	(let [img (js/Image.)]
