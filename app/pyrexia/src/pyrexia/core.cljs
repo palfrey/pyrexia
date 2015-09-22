@@ -16,7 +16,7 @@
 (defonce app-state (atom {:nodes []
                           :timer nil
                           :map (js/Image.)
-                          :locations {"temp-1a:fe:34:fa:b2:af" [50 50]
+                          :locations {"temp-1a:fe:34:fa:b2:af" [500 500]
                                       "temp-1a:fe:34:fa:b2:bf" [100 100]}}))
 
 (def r (t/reader :json))
@@ -51,8 +51,15 @@
         weightTotal (apply + weights)
         weightedValues (map #(/ (:value %) (+ 1 (:distance %))) values)
         weightedSum (apply + weightedValues)]
-    (.log js/console "wa" weightedSum weightTotal (/ weightedSum weightTotal))
+    ;(.log js/console "wa" weightedSum weightTotal (/ weightedSum weightTotal))
     (/ weightedSum weightTotal)))
+
+(defn alpha-blend [values]
+  (let [distances (map :distance values)
+        maxDistance (apply max distances)
+        fudgeFactor 700.0]
+    ;(.log js/console "ab" maxDistance)
+    (min 1.0 (/ 1.0 (/ maxDistance fudgeFactor)))))
 
 (defn temp-for-locations [boxWidth boxHeight]
   (let [locations (:locations @app-state)
@@ -72,26 +79,36 @@
                                              (Math/pow (- (-> node :location second) y) 2.0)))})
 
 (defn draw-map [canvas mapImage]
-  (set! (.-width canvas) (.-width mapImage))
-  (set! (.-height canvas) (.-height mapImage))
   (let [context (.getContext canvas "2d")
-        gridSize 2
+        gridSize 40
+        imageWidth (.-width mapImage)
+        imageHeight (.-height mapImage)
         boxWidth (/ (.-width canvas) gridSize)
         boxHeight (/ (.-height canvas) gridSize)
         values (-> (:nodes @app-state) vals)
         temp (-> (temp-for-locations boxWidth boxHeight) seq)
-        grid (apply merge (for
-                           [x (range gridSize) y (range gridSize)]
-                            {[x y] (weighted-average (map #(rangeValues % x y) temp))}))
+        grid (apply merge
+                    (for
+                     [x (range 0 gridSize)
+                      y (range 0 gridSize)
+                      :let [rangeVals (map #(rangeValues % (* (+ .5 x) imageWidth) (* (+ .5 y) imageHeight)) temp)]]
+                      {[x y] {:average (weighted-average rangeVals)
+                              :blend (alpha-blend rangeVals)}}))
         minTemp (apply min (vals grid))
         maxTemp (apply max (vals grid))]
+    (set! (.-width canvas) imageWidth)
+    (set! (.-height canvas) imageHeight)
+    (.log js/console "image" imageWidth imageHeight)
     (.drawImage context mapImage 0 0)
-    (.log js/console "max" minTemp maxTemp)
-    (.fillRect context 0 0 boxWidth boxHeight)
-    (set! (.-fillStyle context) "#ff0000")
-    (set! (.-globalAlpha context) .5)
-    (.log js/console context)
-    (.fillRect context 100 100 10 10)))
+    (doall (for [key (keys grid)
+                 :let [value (get grid key)
+                       x (first key)
+                       y (second key)]]
+             (do
+               ;(.log js/console "grid" (first key) (second key) (:blend value))
+               (set! (.-fillStyle context) "#ff0000")
+               (set! (.-globalAlpha context) (:blend value))
+               (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))))
 
 (def canvas-dom (.getElementById js/document "map"))
 
@@ -114,7 +131,8 @@
       (fetch-events)
       (. timer (start))
       (swap! app-state assoc :timer timer)
-      (events/listen timer goog.Timer/TICK fetch-events))))
+      ;(events/listen timer goog.Timer/TICK fetch-events)
+)))
 
 (if (-> (:timer @app-state) nil? not)
   (.stop (:timer @app-state)))
