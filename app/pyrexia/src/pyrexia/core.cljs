@@ -51,47 +51,43 @@
         weightTotal (apply + weights)
         weightedValues (map #(/ (:value %) (+ 1 (:distance %))) values)
         weightedSum (apply + weightedValues)]
-    ;(.log js/console "wa" weightedSum weightTotal (/ weightedSum weightTotal))
     (/ weightedSum weightTotal)))
 
 (defn alpha-blend [values]
   (let [distances (map :distance values)
-        maxDistance (apply max distances)
-        fudgeFactor 700.0]
-    ;(.log js/console "ab" maxDistance)
-    (min 1.0 (/ 1.0 (/ maxDistance fudgeFactor)))))
+        minDistance (apply min distances)
+        fudgeFactor 100.0]
+    (min 1.0 (/ 1.0 (/ minDistance fudgeFactor)))))
 
-(defn temp-for-locations [boxWidth boxHeight]
+(defn temp-for-locations []
   (let [locations (:locations @app-state)
         nodes (:nodes @app-state)]
-    (.log js/console "tl-beg" (keys locations) (keys nodes) (keys @app-state))
     (for [node (keys locations)
           :when (contains (keys nodes) node)
           :let [location (get locations node)
                 data (get nodes node)]]
-      (do
-        (.log js/console "tl" location data)
-        {:location location :temp (:temp data)}))))
+      {:location location :temp (:temp data)})))
 
 (defn rangeValues [node x y]
-  {:value (:temp node) :distance (Math/sqrt (+
-                                             (Math/pow (- (-> node :location first) x) 2.0)
-                                             (Math/pow (- (-> node :location second) y) 2.0)))})
+  {:value (:temp node)
+   :distance (Math/sqrt (+
+                         (Math/pow (- (-> node :location first) x) 2.0)
+                         (Math/pow (- (-> node :location second) y) 2.0)))})
 
 (defn draw-map [canvas mapImage]
   (let [context (.getContext canvas "2d")
-        gridSize 40
+        gridSize 20
         imageWidth (.-width mapImage)
         imageHeight (.-height mapImage)
-        boxWidth (/ (.-width canvas) gridSize)
-        boxHeight (/ (.-height canvas) gridSize)
+        boxWidth (/ imageWidth gridSize)
+        boxHeight (/ imageHeight gridSize)
         values (-> (:nodes @app-state) vals)
-        temp (-> (temp-for-locations boxWidth boxHeight) seq)
+        temp (seq (temp-for-locations))
         grid (apply merge
                     (for
                      [x (range 0 gridSize)
                       y (range 0 gridSize)
-                      :let [rangeVals (map #(rangeValues % (* (+ .5 x) imageWidth) (* (+ .5 y) imageHeight)) temp)]]
+                      :let [rangeVals (map #(rangeValues % (* (+ .5 x) boxWidth) (* (+ .5 y) boxHeight)) temp)]]
                       {[x y] {:average (weighted-average rangeVals)
                               :blend (alpha-blend rangeVals)}}))
         minTemp (apply min (vals grid))
@@ -100,15 +96,22 @@
     (set! (.-height canvas) imageHeight)
     (.log js/console "image" imageWidth imageHeight)
     (.drawImage context mapImage 0 0)
-    (doall (for [key (keys grid)
-                 :let [value (get grid key)
-                       x (first key)
-                       y (second key)]]
-             (do
-               ;(.log js/console "grid" (first key) (second key) (:blend value))
-               (set! (.-fillStyle context) "#ff0000")
-               (set! (.-globalAlpha context) (:blend value))
-               (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))))
+
+    (doall
+     (for [key (keys grid)
+           :let [value (get grid key)
+                 x (first key)
+                 y (second key)]]
+       (do
+         (set! (.-fillStyle context) "#ff0000")
+         (set! (.-globalAlpha context) (:blend value))
+         (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))
+
+    (set! (.-fillStyle context) "#000000")
+    (set! (.-globalAlpha context) 1.0)
+    (doall
+     (for [[x y] (-> @app-state :locations vals)]
+       (.fillRect context x y boxWidth boxHeight)))))
 
 (def canvas-dom (.getElementById js/document "map"))
 
@@ -142,12 +145,14 @@
   (reify
     om/IRender
     (render [this]
-      (dom/li #js {:onMouseOver (fn [e]
-                                  (classes/add (.-target e) "foo")
-                                  (.stopPropagation e))
-                   :onMouseOut (fn [e]
-                                 (classes/remove (.-target e) "foo")
-                                 (.stopPropagation e))}
+      (dom/li #js {:onMouseOver
+                   (fn [e]
+                     (classes/add (.-target e) "foo")
+                     (.stopPropagation e))
+                   :onMouseOut
+                   (fn [e]
+                     (classes/remove (.-target e) "foo")
+                     (.stopPropagation e))}
               (first sensor)
               (apply dom/ul nil
                      (map
