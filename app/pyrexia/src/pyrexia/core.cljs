@@ -151,7 +151,7 @@
                  y (second key)]]
        (do
          (set! (.-fillStyle context) (valueColour (:average value)))
-         (.log js/console "colour" (:average value) (valueColour (:average value)))
+         ;(.log js/console "colour" (:average value) (valueColour (:average value)))
          (set! (.-globalAlpha context) (:blend value))
          (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))
 
