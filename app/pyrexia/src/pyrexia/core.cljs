@@ -16,6 +16,8 @@
 (defonce app-state (atom {:nodes []
                           :timer nil
                           :map (js/Image.)
+                          :minValue 100 ; random high value
+                          :maxValue 0
                           :locations {"temp-1a:fe:34:fa:b2:af" [500 500]
                                       "temp-1a:fe:34:fa:b2:bf" [100 100]}}))
 
@@ -51,13 +53,15 @@
         weightTotal (apply + weights)
         weightedValues (map #(/ (:value %) (+ 1 (:distance %))) values)
         weightedSum (apply + weightedValues)]
-    (/ weightedSum weightTotal)))
+    (if (= weightTotal 0)
+      0
+      (/ weightedSum weightTotal))))
 
 (defn alpha-blend [values]
   (let [distances (map :distance values)
         minDistance (apply min distances)
-        fudgeFactor 100.0]
-    (min 1.0 (/ 1.0 (/ minDistance fudgeFactor)))))
+        fudgeFactor 200.0]
+    (min 0.5 (/ 1.0 (/ minDistance fudgeFactor)))))
 
 (defn temp-for-locations []
   (let [locations (:locations @app-state)
@@ -73,6 +77,49 @@
    :distance (Math/sqrt (+
                          (Math/pow (- (-> node :location first) x) 2.0)
                          (Math/pow (- (-> node :location second) y) 2.0)))})
+
+(defn eitherRange [start end]
+  (cond
+    (< start end) (apply concat (range start end) (repeat [end]))
+    (= start end) (repeat end)
+    :else (apply concat (range start end -1) (repeat [start]))))
+
+(defn colour-seq [[r1 g1 b1] [r2 g2 b2]]
+  (take 0xff (partition 3 (interleave (eitherRange r1 r2) (eitherRange g1 g2) (eitherRange b1 b2)))))
+
+(def red [0xff 0 0])
+(def yellow [0xff 0xff 00])
+(def green [00 0xff 00])
+(def cyan [00 0xff 0xff])
+(def blue [00 00 0xff])
+
+(def colours [red yellow green cyan blue])
+
+(def rainbow
+  (apply concat
+         (for [i (range (- (count colours) 1))
+               :let [first (get colours i)
+                     second (get colours (+ 1 i))]]
+           (colour-seq first second))))
+
+(defn- padstring [string length]
+  (let [actualLength (count string)]
+    (if (< actualLength length)
+      (str (apply str (repeat (- length actualLength) "0")) string)
+      string)))
+
+(defn rgb [args]
+  (apply str "#" (map #(padstring (.toString % 16) 2) args)))
+
+(defn valueColour [value]
+  (cond
+    (= value 0) "#ffffff"
+    (= (:maxValue @app-state) (:minValue @app-state)) (rgb (first rainbow))
+    :else (let [valueRange (- (:maxValue @app-state) (:minValue @app-state))
+                position (/ (- value (:minValue @app-state)) valueRange)
+                rainbowSize (count rainbow)
+                index (int (* position rainbowSize))]
+            (rgb (nth rainbow index)))))
 
 (defn draw-map [canvas mapImage]
   (let [context (.getContext canvas "2d")
@@ -103,15 +150,18 @@
                  x (first key)
                  y (second key)]]
        (do
-         (set! (.-fillStyle context) "#ff0000")
+         (set! (.-fillStyle context) (valueColour (:average value)))
+         (.log js/console "colour" (:average value) (valueColour (:average value)))
          (set! (.-globalAlpha context) (:blend value))
          (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))
 
-    (set! (.-fillStyle context) "#000000")
-    (set! (.-globalAlpha context) 1.0)
-    (doall
-     (for [[x y] (-> @app-state :locations vals)]
-       (.fillRect context x y boxWidth boxHeight)))))
+    ; (set! (.-fillStyle context) "#000000")
+    ; (set! (.-globalAlpha context) 1.0)
+    ; (doall
+    ;  (for [[x y] (-> @app-state :locations vals)]
+    ;    (.fillRect context x y boxWidth boxHeight)))
+	;
+))
 
 (def canvas-dom (.getElementById js/document "map"))
 
@@ -119,6 +169,12 @@
   (let [buckets (-> node-data :aggregations :group_by_state :buckets)
         nodes (apply merge (map #(hash-map (:key %) (-> % :top_tag_hits :hits :hits first :_source)) buckets))]
     (.log js/console "nodes" (pr-str nodes))
+    (if (-> nodes nil? not)
+      (do
+        (swap! app-state assoc :minValue (apply min (:minValue @app-state) (map :temp (vals nodes))))
+        (.log js/console "minValue" (:minValue @app-state))
+        (swap! app-state assoc :maxValue (apply max (:maxValue @app-state) (map :temp (vals nodes))))
+        (.log js/console "maxValue" (:maxValue @app-state))))
     (swap! app-state assoc node-key nodes)
     (swap! app-state assoc :nodes (merge (:old-nodes @app-state) (:new-nodes @app-state)))
     (draw-map canvas-dom (:map @app-state))))
