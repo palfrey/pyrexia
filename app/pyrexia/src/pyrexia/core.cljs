@@ -5,21 +5,21 @@
    [goog.events :as events]
    [goog.dom.classes :as classes]
    [cognitect.transit :as t]
-   [om.core :as om]
-   [om.dom :as dom]
    [cljs-time.core :as time]
    [cljs-time.format :as tf]
-   [monet.canvas :as canvas])
+   [reagent.core :as r])
   (:require-macros [pyrexia.env :as env :refer [cljs-env]])
   (:import [goog.net XhrIo])) (enable-console-print!)
 
-(defonce app-state (atom {:nodes []
-                          :timer nil
-                          :map (js/Image.)
-                          :minValue 100 ; random high value
-                          :maxValue 0
-                          :locations {"temp-1a:fe:34:fa:b2:af" [500 500]
-                                      "temp-1a:fe:34:fa:b2:bf" [100 100]}}))
+(defonce app-state
+  (r/atom
+   {:nodes []
+    :timer nil
+    :map (js/Image.)
+    :minValue 100 ; random high value
+    :maxValue 0
+    :locations {"temp-1a:fe:34:fa:b2:af" [500 500]
+                "temp-1a:fe:34:fa:b2:bf" [100 100]}}))
 
 (def r (t/reader :json))
 (def w (t/writer :json-verbose))
@@ -197,35 +197,32 @@
   (.stop (:timer @app-state)))
 (poll)
 
-(defn sensor-view [sensor owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/li #js {:onMouseOver
-                   (fn [e]
-                     (classes/add (.-target e) "foo")
-                     (.stopPropagation e))
-                   :onMouseOut
-                   (fn [e]
-                     (classes/remove (.-target e) "foo")
-                     (.stopPropagation e))}
-              (first sensor)
-              (apply dom/ul nil
-                     (map
-                      #(dom/li nil (-> % first name) " : " (-> % second))
-                      (select-keys (second sensor) [:temp :humid (keyword "@timestamp")])))))))
+(defn sensor-view [sensor]
+  ^{:key (first sensor)}
+  [:li #js {:onMouseOver
+            (fn [e]
+              (classes/add (.-target e) "foo")
+              (.stopPropagation e))
+            :onMouseOut
+            (fn [e]
+              (classes/remove (.-target e) "foo")
+              (.stopPropagation e))}
+   (first sensor)
 
-(defn sensors-view [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (apply dom/ul nil
-             (om/build-all sensor-view (:nodes data))))))
+   ^{:key (str (first sensor) "-ul")}
+   [:ul
+    (map
+     #(with-meta [:li (str (-> % first name) " : " (-> % second))] {:key (-> % first name)})
+     (select-keys (second sensor) [:temp :humid (keyword "@timestamp")]))]])
 
-(om/root sensors-view app-state
-         {:target (. js/document (getElementById "sensors"))})
+(defn sensors-view []
+  [:ul (map sensor-view (:nodes @app-state))])
 
-(defn map-image []
+(def render-sensors
+  (r/render [sensors-view]
+            (. js/document (getElementById "sensors"))))
+
+(defonce map-image
   (let [img (js/Image.)]
     (set! (.-src img) "map.png")
     (set! (.-onload img)
@@ -233,5 +230,3 @@
             (swap! app-state assoc :map (.-target e))
             (draw-map canvas-dom (:map @app-state))))
     img))
-
-(map-image)
