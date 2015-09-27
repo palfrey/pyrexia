@@ -15,6 +15,12 @@
           :onMouseOut
           (fn [e]
             (classes/remove (.getElementById js/document id) "box")
+            (.stopPropagation e))
+          :onClick
+          (fn [e]
+            (doseq [el (array-seq (.getElementsByClassName js/document "selected"))]
+              (classes/remove el "selected"))
+            (classes/add (.getElementById js/document id) "selected")
             (.stopPropagation e))}
      (first sensor)
 
