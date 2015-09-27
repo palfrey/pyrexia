@@ -3,7 +3,6 @@
    [clojure.walk :refer [keywordize-keys]]
    [goog.Timer :as timer]
    [goog.events :as events]
-   [goog.dom.classes :as classes]
    [cognitect.transit :as t]
    [cljs-time.core :as time]
    [cljs-time.format :as tf]
@@ -11,7 +10,8 @@
    [pyrexia.common :as c]
    [pyrexia.colour-line :as cl]
    [pyrexia.rainbow :as rb]
-   [pyrexia.map :as map])
+   [pyrexia.map :as map]
+   [pyrexia.sensors :as sensors])
   (:require-macros [pyrexia.env :as env :refer [cljs-env]])
   (:import [goog.net XhrIo]))
 
@@ -70,28 +70,3 @@
 (if (-> (:timer @c/app-state) nil? not)
   (.stop (:timer @c/app-state)))
 (poll)
-
-(defn sensor-view [sensor]
-  ^{:key (first sensor)}
-  [:li #js {:onMouseOver
-            (fn [e]
-              (classes/add (.-target e) "foo")
-              (.stopPropagation e))
-            :onMouseOut
-            (fn [e]
-              (classes/remove (.-target e) "foo")
-              (.stopPropagation e))}
-   (first sensor)
-
-   ^{:key (str (first sensor) "-ul")}
-   [:ul
-    (map
-     #(with-meta [:li (str (-> % first name) " : " (-> % second))] {:key (-> % first name)})
-     (select-keys (second sensor) [:temp :humid (keyword "@timestamp")]))]])
-
-(defn sensors-view []
-  [:ul (map sensor-view (into (sorted-map-by <) (:nodes @c/app-state)))])
-
-(def render-sensors
-  (r/render [sensors-view]
-            (. js/document (getElementById "sensors"))))
