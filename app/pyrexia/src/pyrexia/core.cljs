@@ -91,7 +91,7 @@
      (select-keys (second sensor) [:temp :humid (keyword "@timestamp")]))]])
 
 (defn sensors-view []
-  [:ul (map sensor-view (:nodes @c/app-state))])
+  [:ul (map sensor-view (into (sorted-map-by <) (:nodes @c/app-state)))])
 
 (def render-sensors
   (r/render [sensors-view]
