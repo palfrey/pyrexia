@@ -9,5 +9,4 @@
     :minValue 100 ; random high value
     :maxValue 0
     :selected nil
-    :locations {"temp-1a:fe:34:fa:b2:af" [500 500]
-                "temp-1a:fe:34:fa:b2:bf" [100 100]}}))
+    :locations {}}))
