@@ -7,6 +7,7 @@
    [cognitect.transit :as t]
    [cljs-time.core :as time]
    [cljs-time.format :as tf]
+   [goog.string :as gstring]
    [reagent.core :as r])
   (:require-macros [pyrexia.env :as env :refer [cljs-env]])
   (:import [goog.net XhrIo])) (enable-console-print!)
@@ -118,7 +119,7 @@
     :else (let [valueRange (- (:maxValue @app-state) (:minValue @app-state))
                 position (/ (- value (:minValue @app-state)) valueRange)
                 rainbowSize (count rainbow)
-                index (int (* position rainbowSize))]
+                index (int (* (- 1.0 position) rainbowSize))]
             (rgb (nth rainbow index)))))
 
 (defn draw-map [canvas mapImage]
@@ -218,9 +219,39 @@
 (defn sensors-view []
   [:ul (map sensor-view (:nodes @app-state))])
 
+(defn mid [x y]
+  (+ x (/ (- y x) 2)))
+
+(defn colours-view []
+  (let [colour-count 20
+        colour-width (.-width (:map @app-state))
+        box-width (/ colour-width colour-count)
+        bar-height 30
+        rainbow-count (count rainbow)
+        rainbow-step (/ rainbow-count colour-count)]
+    ^{:key :colour-map}
+    [:svg {:width colour-width :height (* 2 bar-height)}
+     (concat
+      [[:text {:x 0 :y (- bar-height 2) :font-size bar-height} (:minValue @app-state)]
+       [:text {:x (- (/ colour-width 2) 40) :y (- bar-height 2) :font-size bar-height} (mid (:minValue @app-state) (:maxValue @app-state))]
+       [:text {:x (- colour-width 40) :y (- bar-height 2) :font-size bar-height} (:maxValue @app-state)]]
+      (map
+       #(with-meta
+          [:rect {:x (+ (* % box-width) 1)
+                  :y bar-height
+                  :width box-width
+                  :height bar-height
+                  :style {:fill (rgb (nth rainbow (- (- rainbow-count 1) (* rainbow-step %))))}}]
+          {:key (gstring/format "box-%d" %)})
+       (range colour-count)))]))
+
 (def render-sensors
   (r/render [sensors-view]
             (. js/document (getElementById "sensors"))))
+
+(def render-colours
+  (r/render [colours-view]
+            (.getElementById js/document "colours")))
 
 (defonce map-image
   (let [img (js/Image.)]
