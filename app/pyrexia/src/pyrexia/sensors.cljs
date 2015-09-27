@@ -1,7 +1,22 @@
 (ns pyrexia.sensors
   (:require [goog.dom.classes :as classes]
             [pyrexia.common :as c]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [goog.events :as events]
+            [goog.events.EventType :as event-type]
+            [pyrexia.map :as map]))
+
+(defonce map-selector
+  (events/listen
+   map/canvas-dom event-type/CLICK
+   (fn [e]
+     (.log js/console "mouse" (.-offsetX e) (.-offsetY e))
+     (let [selected (:selected @c/app-state)]
+       (if (-> selected nil? not)
+         (do
+           (swap! c/app-state assoc-in [:locations selected] [(.-offsetX e) (.-offsetY e)])
+           (.log js/console (:locations @c/app-state))
+           (map/draw-map map/canvas-dom (:map @c/app-state))))))))
 
 (defn sensor-view [sensor]
   (let [id (first sensor)]
@@ -21,6 +36,7 @@
             (doseq [el (array-seq (.getElementsByClassName js/document "selected"))]
               (classes/remove el "selected"))
             (classes/add (.getElementById js/document id) "selected")
+            (swap! c/app-state assoc :selected id)
             (.stopPropagation e))}
      (first sensor)
 
