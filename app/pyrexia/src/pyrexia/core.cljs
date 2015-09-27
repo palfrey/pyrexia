@@ -65,8 +65,7 @@
       (fetch-events)
       (. timer (start))
       (swap! c/app-state assoc :timer timer)
-      ;(events/listen timer goog.Timer/TICK fetch-events)
-)))
+      (events/listen timer goog.Timer/TICK fetch-events))))
 
 (if (-> (:timer @c/app-state) nil? not)
   (.stop (:timer @c/app-state)))
