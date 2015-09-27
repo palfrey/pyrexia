@@ -1,2 +1,9 @@
 /* some style */
 
+.no-box {
+	border: solid 1px white;
+}
+
+.box {
+	border: solid 1px black;
+}
