@@ -44,14 +44,12 @@
   (let [buckets (-> node-data :aggregations :group_by_state :buckets)
         nodes (apply merge (map #(hash-map (:key %) (-> % :top_tag_hits :hits :hits first :_source)) buckets))]
     (.log js/console "nodes" (pr-str nodes))
-    (if (-> nodes nil? not)
-      (do
-        (swap! c/app-state assoc :minValue (apply min (:minValue @c/app-state) (map :temp (vals nodes))))
-        (.log js/console "minValue" (:minValue @c/app-state))
-        (swap! c/app-state assoc :maxValue (apply max (:maxValue @c/app-state) (map :temp (vals nodes))))
-        (.log js/console "maxValue" (:maxValue @c/app-state))))
     (swap! c/app-state assoc node-key nodes)
     (swap! c/app-state assoc :nodes (merge (:old-nodes @c/app-state) (:new-nodes @c/app-state)))
+    (swap! c/app-state assoc :minValue (apply min (map :temp (vals (:nodes @c/app-state)))))
+    (.log js/console "minValue" (:minValue @c/app-state))
+    (swap! c/app-state assoc :maxValue (apply max (map :temp (vals (:nodes @c/app-state)))))
+    (.log js/console "maxValue" (:maxValue @c/app-state))
     (map/draw-map map/canvas-dom (:map @c/app-state))))
 
 (defn fetch-events []

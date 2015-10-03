@@ -6,7 +6,7 @@
    {:nodes []
     :timer nil
     :map (js/Image.)
-    :minValue 100 ; random high value
+    :minValue 0
     :maxValue 0
     :selected nil
     :locations {}}))
