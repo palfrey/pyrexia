@@ -3,7 +3,6 @@
    [clojure.walk :refer [keywordize-keys]]
    [goog.Timer :as timer]
    [goog.events :as events]
-   [cognitect.transit :as t]
    [cljs-time.core :as time]
    [cljs-time.format :as tf]
    [reagent.core :as r]
@@ -11,14 +10,9 @@
    [pyrexia.colour-line :as cl]
    [pyrexia.rainbow :as rb]
    [pyrexia.map :as map]
-   [pyrexia.sensors :as sensors])
-  (:require-macros [pyrexia.env :as env :refer [cljs-env]])
-  (:import [goog.net XhrIo]))
+   [pyrexia.sensors :as sensors]))
 
 (enable-console-print!)
-
-(def r (t/reader :json))
-(def w (t/writer :json-verbose))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
@@ -31,14 +25,15 @@
 (defn logName [date]
   (str "temperature-" (tf/unparse logstashFormatter date)))
 
-(defn retrieve
-  [log payload callback error-callback]
-  (let [xhr (XhrIo.)]
-    (events/listen xhr goog.net.EventType.COMPLETE
-                   (fn [e]
-                     (callback (t/read r (.getResponseText xhr)))))
-    (. xhr
-       (send (str "http://" (cljs-env :es-host "localhost") ":9200/" log "/_search") "POST" payload))))
+(defn retrieve-search [log payload callback error-callback]
+  (c/retrieve
+   (str log "/_search") "POST" payload {}
+   callback error-callback))
+
+(defn create-index [log callback error-callback]
+  (c/retrieve
+   log "PUT" nil {}
+   callback error-callback))
 
 (defn parse-nodes [node-data node-key]
   (let [buckets (-> node-data :aggregations :group_by_state :buckets)
@@ -53,8 +48,26 @@
     (map/draw-map map/canvas-dom (:map @c/app-state))))
 
 (defn fetch-events []
-  (retrieve (logName (time/now)) search-query #(parse-nodes (-> % keywordize-keys) :new-nodes) #())
-  (retrieve (-> (time/now) (time/minus (time/days 1)) logName) search-query #(parse-nodes (-> % keywordize-keys) :old-nodes) #()))
+  (retrieve-search (logName (time/now)) search-query #(parse-nodes (-> % keywordize-keys) :new-nodes) #())
+  (retrieve-search (-> (time/now) (time/minus (time/days 1)) logName) search-query #(parse-nodes (-> % keywordize-keys) :old-nodes) #()))
+
+(defn fetch-nodes []
+  (retrieve-search
+   "nodes" ""
+   (fn [data]
+     (.log js/console "result" data)
+     (let [nodes (-> data keywordize-keys :hits :hits)
+           nodes (map (keyword "_source") nodes)]
+       (.log js/console "parsed" nodes)
+       (doseq [node nodes]
+         (swap! c/app-state assoc-in [:locations (:node node)] [(:x node) (:y node)]))
+       (map/draw-map map/canvas-dom (:map @c/app-state))))
+   (fn [data]
+     (if (= (get data "status") 404)
+       (do
+         (.log js/console "need to make nodes")
+         (create-index "nodes" #() #()))
+       (.log js/console "error" data)))))
 
 (defn poll
   [key every func]
@@ -68,3 +81,4 @@
       (events/listen timer goog.Timer/TICK func))))
 
 (poll :temperature-timer 5000 fetch-events)
+(poll :nodes-timer 5000 fetch-nodes)
