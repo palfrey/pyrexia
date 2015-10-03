@@ -26,4 +26,4 @@
                      (if (.isSuccess xhr)
                        (callback (t/read r (.getResponseText xhr)))
                        (error-callback (t/read r (.getResponseText xhr))))))
-    (. xhr send (str "http://" (cljs-env :es-host "localhost") ":9200/" url) method content headers)))
+    (. xhr send (str "http://" (cljs-env :es-host (.-hostname (.-location js/window))) ":9200/" url) method content headers)))

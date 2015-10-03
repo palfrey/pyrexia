@@ -9,3 +9,7 @@ logstash:
     - ./logstash/config:/etc/logstash/conf.d
   links:
     - elasticsearch
+pyrexia:
+  build: pyrexia/
+  ports:
+    - "8080:80"
