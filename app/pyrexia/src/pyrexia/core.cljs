@@ -62,9 +62,9 @@
     (do
       (fetch-events)
       (. timer (start))
-      (swap! c/app-state assoc :timer timer)
+      (swap! c/app-state assoc :temperature-timer timer)
       (events/listen timer goog.Timer/TICK fetch-events))))
 
-(if (-> (:timer @c/app-state) nil? not)
-  (.stop (:timer @c/app-state)))
+(if (-> (:temperature-timer @c/app-state) nil? not)
+  (.stop (:temperature-timer @c/app-state)))
 (poll)

@@ -4,7 +4,7 @@
 (defonce app-state
   (r/atom
    {:nodes []
-    :timer nil
+    :temperature-timer nil
     :map (js/Image.)
     :minValue 0
     :maxValue 0
