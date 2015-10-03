@@ -57,14 +57,14 @@
   (retrieve (-> (time/now) (time/minus (time/days 1)) logName) search-query #(parse-nodes (-> % keywordize-keys) :old-nodes) #()))
 
 (defn poll
-  []
-  (let [timer (goog.Timer. 5000)]
+  [key every func]
+  (if (-> (key @c/app-state) nil? not)
+    (.stop (key @c/app-state)))
+  (let [timer (goog.Timer. every)]
     (do
-      (fetch-events)
+      (func)
       (. timer (start))
-      (swap! c/app-state assoc :temperature-timer timer)
-      (events/listen timer goog.Timer/TICK fetch-events))))
+      (swap! c/app-state assoc key timer)
+      (events/listen timer goog.Timer/TICK func))))
 
-(if (-> (:temperature-timer @c/app-state) nil? not)
-  (.stop (:temperature-timer @c/app-state)))
-(poll)
+(poll :temperature-timer 5000 fetch-events)
