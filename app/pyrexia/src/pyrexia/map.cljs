@@ -45,7 +45,7 @@
     :else (let [valueRange (- (:maxValue @c/app-state) (:minValue @c/app-state))
                 position (/ (- value (:minValue @c/app-state)) valueRange)
                 rainbowSize (count rb/rainbow)
-                index (int (* (- 1.0 position) rainbowSize))]
+                index (min (int (* (- 1.0 position) rainbowSize)) (- rainbowSize 1))]
             (rb/rgb (nth rb/rainbow index)))))
 
 (defn draw-map [canvas mapImage]
