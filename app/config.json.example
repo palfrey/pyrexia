@@ -1,7 +1,7 @@
 {
-	"host" : "bunny.cloudamqp.com",
-	"vhost" : "",
-	"user" : "",
-	"password" : "",
+	"host" : "<local IP>",
+	"vhost" : "/",
+	"user" : "guest",
+	"password" : "guest",
 	"port": 1883
 }

@@ -25,3 +25,8 @@ lein cljsbuild once min
 cd ..
 docker-compose build
 docker-compose up -d
+
+AP Wifi IP is 192.168.4.1
+
+rabbitmq-plugins enable rabbitmq_mqtt
+/usr/local/opt/rabbitmq/sbin/rabbitmq-plugins enable rabbitmq_mqtt

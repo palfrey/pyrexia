@@ -9,7 +9,14 @@ logstash:
     - ./logstash/config:/etc/logstash/conf.d
   links:
     - elasticsearch
+    - rabbitmq
 pyrexia:
   build: pyrexia/
   ports:
     - "8080:80"
+rabbitmq:
+  image: rabbitmq:management
+  ports:
+    - "1833:1833"
+    - "15672"
+    - "5672"
