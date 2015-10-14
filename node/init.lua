@@ -105,6 +105,8 @@ if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
 	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
 	   else
 		   print("Error status of temp sensor: " .. status)
+	       local msg = {status = status, id = name }
+	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
 	   end
      end)
   end)
