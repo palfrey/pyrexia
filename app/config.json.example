@@ -3,5 +3,5 @@
 	"vhost" : "/",
 	"user" : "guest",
 	"password" : "guest",
-	"port": 1883
+	"port": 1833
 }
