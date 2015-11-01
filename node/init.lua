@@ -7,7 +7,6 @@ end
 for key,value in pairs(config) do print(key .. " = " .. value) end
 
 local name = "temp" .. "-" .. wifi.ap.getmac()
-local mqttClientID = name
 
 wifi.setmode(wifi.STATIONAP)
 
@@ -42,27 +41,31 @@ if config["ssid"] ~= nil and config["password"] ~= nil then
      print("STATION_GOT_IP")
      print(wifi.sta.getip())
 
-     if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
-       print ("connecting to " .. config["mqttHost"])
-       local m = mqtt.Client(mqttClientID, 120, config["mqttUser"], config["mqttPassword"])
-       m:on("offline", function(con) print("Disconnected from MQTT") end)  
-       m:connect(config["mqttHost"], config["mqttPort"], 0, function(conn)
-          print("Connected to MQTT:" .. config["mqttHost"] .. ":" .. config["mqttPort"] .." as " .. mqttClientID )
+     if config["udpHost"] ~= nil and config["udpPort"] ~= nil then
+       print ("connecting to " .. config["udpHost"] .. ":" ..config["udpPort"])
+	   local conn = net.createConnection(net.UDP, 0)
+       conn:on("disconnection", function(con) print("Disconnected from MQTT") end)
+       conn:on("connection", function(sk)
+          print("Connected to UDP:" .. config["udpHost"] .. ":" .. config["udpPort"] .." as " .. name )
           tmr.alarm(0, 5000, 1, function()
-            print("reading temperature")
+          print("reading temperature")
      	   local status, temp, humid = dht.read(4)
             if (status == dht.OK) then
      		   print("Got temperature " .. temp .. " and humidity " .. humid)
      	       local msg = {temp = temp, humid = humid, id = name }
-     	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
+			   sk:send(cjson.encode(msg), function(conn) print("sent") end)
      	   else
      		   print("Error status of temp sensor: " .. status)
      	       local msg = {status = status, id = name }
-     	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
+     	       sk:send(cjson.encode(msg), function(conn) print("sent") end)
      	   end
           end)
        end)
-     end
+	   conn:connect(config["udpPort"], config["udpHost"])
+   else
+   print(config)
+ end
+
     end)
     wifi.sta.eventMonStart()
   wifi.sta.config(config["ssid"], config["password"])
