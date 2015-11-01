@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 from sys import argv
 client = mqtt.Client()
-client.username_pw_set("{{ user }}:{{ vhost }}", "{{ password }}")
+client.username_pw_set("{{ vhost }}:{{ user }}", "{{ password }}")
 result = client.connect("{{ host }}", {{ port }}, 60)
 if result != mqtt.MQTT_ERR_SUCCESS:
 	raise Exception, result
