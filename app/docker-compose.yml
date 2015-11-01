@@ -15,7 +15,7 @@ pyrexia:
   ports:
     - "8080:80"
 rabbitmq:
-  image: rabbitmq:management
+  build: rabbitmq
   ports:
     - "1833:1833"
     - "15672"
