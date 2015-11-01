@@ -18,17 +18,53 @@ cfg.beacon = 100
 cfg.auth = AUTH_OPEN
 wifi.ap.config(cfg)
 
+function readTemp(pin)
+	status,temp,humi = dht.read(pin)
+	if( status == dht.OK ) then
+	  print("DHT Temperature:"..temp..";".."Humidity:"..humi)
+	elseif( status == dht.ERROR_CHECKSUM ) then
+	  print( "DHT Checksum error." );
+	elseif( status == dht.ERROR_TIMEOUT ) then
+	  print( "DHT Time out." );
+	else
+	  print("Something else")
+	  print(status)
+	end
+end
+
 if config["ssid"] ~= nil and config["password"] ~= nil then
-  -- wifi.sta.eventMonReg(wifi.STA_IDLE, function() print("STATION_IDLE") end)
-  -- wifi.sta.eventMonReg(wifi.STA_CONNECTING, function() print("STATION_CONNECTING") end)
-  -- wifi.sta.eventMonReg(wifi.STA_WRONGPWD, function() print("STATION_WRONG_PASSWORD") end)
-  -- wifi.sta.eventMonReg(wifi.STA_APNOTFOUND, function() print("STATION_NO_AP_FOUND") end)
-  -- wifi.sta.eventMonReg(wifi.STA_FAIL, function() print("STATION_CONNECT_FAIL") end)
-  -- wifi.sta.eventMonReg(wifi.STA_GOTIP, function()
-  --   print("STATION_GOT_IP")
-  --   print(wifi.sta.getip())
-  -- end)
-  -- wifi.sta.eventMonStart()
+    wifi.sta.eventMonReg(wifi.STA_IDLE, function() print("STATION_IDLE") end)
+    wifi.sta.eventMonReg(wifi.STA_CONNECTING, function() print("STATION_CONNECTING") end)
+    wifi.sta.eventMonReg(wifi.STA_WRONGPWD, function() print("STATION_WRONG_PASSWORD") end)
+    wifi.sta.eventMonReg(wifi.STA_APNOTFOUND, function() print("STATION_NO_AP_FOUND") end)
+    wifi.sta.eventMonReg(wifi.STA_FAIL, function() print("STATION_CONNECT_FAIL") end)
+    wifi.sta.eventMonReg(wifi.STA_GOTIP, function()
+     print("STATION_GOT_IP")
+     print(wifi.sta.getip())
+
+     if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
+       print ("connecting to " .. config["mqttHost"])
+       local m = mqtt.Client(mqttClientID, 120, config["mqttUser"], config["mqttPassword"])
+       m:on("offline", function(con) print("Disconnected from MQTT") end)  
+       m:connect(config["mqttHost"], config["mqttPort"], 0, function(conn)
+          print("Connected to MQTT:" .. config["mqttHost"] .. ":" .. config["mqttPort"] .." as " .. mqttClientID )
+          tmr.alarm(0, 5000, 1, function()
+            print("reading temperature")
+     	   local status, temp, humid = dht.read(4)
+            if (status == dht.OK) then
+     		   print("Got temperature " .. temp .. " and humidity " .. humid)
+     	       local msg = {temp = temp, humid = humid, id = name }
+     	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
+     	   else
+     		   print("Error status of temp sensor: " .. status)
+     	       local msg = {status = status, id = name }
+     	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
+     	   end
+          end)
+       end)
+     end
+    end)
+    wifi.sta.eventMonStart()
   wifi.sta.config(config["ssid"], config["password"])
 end
 
@@ -77,37 +113,3 @@ sv:listen(80,function(c)
     c:close()
   end)
 end)
-
-function readTemp(pin)
-	status,temp,humi = dht.read(pin)
-	if( status == dht.OK ) then
-	  print("DHT Temperature:"..temp..";".."Humidity:"..humi)
-	elseif( status == dht.ERROR_CHECKSUM ) then
-	  print( "DHT Checksum error." );
-	elseif( status == dht.ERROR_TIMEOUT ) then
-	  print( "DHT Time out." );
-	else
-	  print("Something else")
-	  print(status)
-	end
-end
-
-if config["mqttHost"] ~= nil and config["mqttUser"] ~= nil then
-  local m = mqtt.Client(mqttClientID, 120, config["mqttUser"], config["mqttPassword"])
-  m:connect(config["mqttHost"], config["mqttPort"], 0, function(conn)
-     print("Connected to MQTT:" .. config["mqttHost"] .. ":" .. config["mqttPort"] .." as " .. mqttClientID )
-     tmr.alarm(0, 5000, 1, function()
-       print("reading temperature")
-	   local status, temp, humid = dht.read(4)
-       if (status == dht.OK) then
-		   print("Got temperature " .. temp .. " and humidity " .. humid)
-	       local msg = {temp = temp, humid = humid, id = name }
-	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
-	   else
-		   print("Error status of temp sensor: " .. status)
-	       local msg = {status = status, id = name }
-	       conn:publish("/temp", cjson.encode(msg), 0, 0, function(conn) print("sent") end)
-	   end
-     end)
-  end)
-end
