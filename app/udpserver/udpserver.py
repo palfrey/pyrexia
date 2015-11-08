@@ -1,11 +1,9 @@
 from twisted.internet.protocol import DatagramProtocol
 from twisted.internet import reactor
 
-class Echo(DatagramProtocol):
-
+class NodeServer(DatagramProtocol):
     def datagramReceived(self, data, (host, port)):
         print "received %r from %s:%d" % (data, host, port)
-        #self.transport.write(data, (host, port))
 
-reactor.listenUDP(3000, Echo())
+reactor.listenUDP(3000, NodeServer())
 reactor.run()

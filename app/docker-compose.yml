@@ -2,21 +2,11 @@ elasticsearch:
   build: elasticsearch/
   ports:
     - "9200:9200"
-logstash:
-  image: logstash:1
-  command: logstash -f /etc/logstash/conf.d/logstash.conf
-  volumes:
-    - ./logstash/config:/etc/logstash/conf.d
-  links:
-    - elasticsearch
-    - rabbitmq
 pyrexia:
   build: pyrexia/
   ports:
     - "8080:80"
-rabbitmq:
-  build: rabbitmq
+udpserver:
+  build: udpserver
   ports:
-    - "1833:1833"
-    - "15672:15672"
-    - "5672:5672"
+    - "3000:3000/udp"
