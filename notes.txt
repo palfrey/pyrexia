@@ -1,12 +1,17 @@
+https://github.com/nodemcu/nodemcu-devkit/wiki/Getting-Started-on-OSX
+https://www.reddit.com/r/OSXElCapitan/comments/3d3uey/did_el_capitan_block_kext_signing_to_create/
+sudo kextload -v -bundle-id com.silabs.driver.CP210xVCPDriver
+
 https://github.com/nodemcu/nodemcu-firmware/wiki/nodemcu_api_en
 
+http://superuser.com/questions/25612/can-i-rebind-screens-escape-combination-to-something-else
+
 https://github.com/kmpm/nodemcu-uploader
-./nodemcu-uploader.py --port /dev/tty.wchusbserial1410 upload ../init.lua:init.lua -r
-./nodemcu-uploader.py --port /dev/tty.wchusbserial1410 upload config.json
+./uploader/-nodemcu-uploader.py --port /dev/tty.wchusbserial1410 upload init.lua config.json -r
 ./nodemcu-uploader.py --port /dev/tty.wchusbserial1410 download config.json
 
 https://github.com/themadinventor/esptool
-./esptool.py --baud 230400 --port /dev/tty.wchusbserial1410 write_flash 0x0000 ../nodemcu-master-10-modules-2015-08-24-12-01-15-float.bin
+./esptool/esptool.py --baud 230400 --port /dev/tty.wchusbserial1410 write_flash 0x0000 ../nodemcu-master-10-modules-2015-08-24-12-01-15-float.bin
 
 http://lb9mg.no/2015/05/30/first-steps-with-nodemcu/
 https://learn.adafruit.com/dht/connecting-to-a-dhtxx-sensor
@@ -30,3 +35,6 @@ AP Wifi IP is 192.168.4.1
 
 rabbitmq-plugins enable rabbitmq_mqtt
 /usr/local/opt/rabbitmq/sbin/rabbitmq-plugins enable rabbitmq_mqtt
+
+http://esp8266.ru/esplorer/
+https://github.com/nodemcu/nodemcu-flasher

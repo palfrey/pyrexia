@@ -1,5 +1,5 @@
 {
-	"host" : "<local IP>",
+	"host" : "rabbitmq",
 	"vhost" : "/",
 	"user" : "guest",
 	"password" : "guest",
