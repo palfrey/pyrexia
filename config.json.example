@@ -1,0 +1,6 @@
+{
+	"host" : "rabbitmq",
+	"vhost" : "/",
+	"user" : "guest",
+	"password" : "guest"
+}

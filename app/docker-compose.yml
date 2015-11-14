@@ -3,9 +3,13 @@ elasticsearch:
   ports:
     - "9200:9200"
 logstash:
-  image: logstash:latest
+  image: logstash:1
   command: logstash -f /etc/logstash/conf.d/logstash.conf
   volumes:
     - ./logstash/config:/etc/logstash/conf.d
   links:
     - elasticsearch
+pyrexia:
+  build: pyrexia/
+  ports:
+    - "8080:80"

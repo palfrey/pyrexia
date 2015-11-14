@@ -1,27 +1,37 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="css/style.css" rel="stylesheet" type="text/css">
-		<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/style.css" rel="stylesheet" type="text/css">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
-	<!-- Latest compiled and minified JavaScript -->
-	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-  </head>
-  <body>
-    <div class="container-fluid">
-		<div class="row">
-		<h1>Temperature</h1>
-	      <div id="sensors" class="col-md-4"></div>
-		  <div class="col-md-8" id="map"></div>
-	    </div>
-	</div>
-    <script src="js/compiled/pyrexia.js" type="text/javascript"></script>
-  </body>
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+        <title>Pyrexia</title>
+    </head>
+
+    <body>
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Temperature</h1>
+                    <div id="sensors" class="col-md-4"></div>
+                    <div class="col-md-8">
+                        <div id="colours"></div>
+                        <div class="col-md-8" id="map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="js/compiled/pyrexia.js" type="text/javascript"></script>
+    </body>
+
 </html>

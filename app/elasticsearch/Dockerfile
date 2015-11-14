@@ -1,4 +1,4 @@
-FROM elasticsearch:latest
+FROM elasticsearch:1
 
 RUN plugin -i mobz/elasticsearch-head
 COPY config/ /usr/share/elasticsearch/config/

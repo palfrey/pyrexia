@@ -4,7 +4,7 @@
     "number_of_shards": 5
   },
   "mappings": {
-    "logs": {
+    "temp": {
       "properties": {
         "id": {
           "type": "string",

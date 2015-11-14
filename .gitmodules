@@ -1,6 +1,6 @@
 [submodule "esptool"]
-	path = esptool
+	path = node/nodemcu/esptool
 	url = https://github.com/themadinventor/esptool
 [submodule "uploader"]
-	path = uploader
+	path = node/nodemcu/uploader
 	url = https://github.com/kmpm/nodemcu-uploader
