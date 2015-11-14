@@ -3,11 +3,21 @@ import logging
 import pika
 import json
 import config
-import Adafruit_DHT
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
 LOGGER = logging.getLogger(__name__)
+
+try:
+	import Adafruit_DHT
+except ImportError:
+	class Adafruit_DHT(object):
+		@staticmethod
+		def read(sensor, pin):
+			LOGGER.info("reading from fake sensor and pin %d" % pin)
+			return 20, 60
+
+		AM2302 = 1
 
 class NodePublisher(object):
     PUBLISH_INTERVAL = 1
