@@ -23,7 +23,7 @@ except ImportError:
 		AM2302 = 1
 
 class NodePublisher(object):
-    PUBLISH_INTERVAL = 1
+    PUBLISH_INTERVAL = 5
     QUEUE = 'temp'
     ROUTING_KEY = QUEUE
     URLS = [config.URL]
