@@ -223,7 +223,7 @@ class NodePublisher(object):
             return
 
         humidity, temperature = Adafruit_DHT.read(Adafruit_DHT.AM2302, config.PIN)
-        message = {"temp" : temperature, "humid" : humid, "id": config.NODE_ID}
+        message = {"temp" : temperature, "humid" : humidity, "id": config.NODE_ID}
         properties = pika.BasicProperties(app_id=config.NODE_ID,
                                           content_type='text/json',
                                           headers=message)
