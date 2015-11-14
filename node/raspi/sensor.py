@@ -312,6 +312,7 @@ class NodePublisher(object):
 def main():
     logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
+    LOGGER.info("This is %s" % config.NODE_ID)
     example = NodePublisher()
     try:
         example.run()
