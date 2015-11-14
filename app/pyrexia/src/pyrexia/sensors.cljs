@@ -16,7 +16,7 @@
 
 (defonce map-selector
   (events/listen
-   map/canvas-dom event-type/CLICK
+   map/map-dom event-type/CLICK
    (fn [e]
      (let [selected (:selected @c/app-state)
            x (.-offsetX e)
@@ -25,8 +25,7 @@
          (do
            (swap! c/app-state assoc-in [:locations selected] [x y])
            (set-node-location selected x y)
-           (.log js/console (:locations @c/app-state))
-           (map/draw-map map/canvas-dom (:map @c/app-state))))))))
+           (.log js/console (:locations @c/app-state))))))))
 
 (defn sensor-view [sensor]
   (let [id (first sensor)]

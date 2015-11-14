@@ -1,6 +1,7 @@
 (ns pyrexia.map
   (:require [pyrexia.common :as c]
-            [pyrexia.rainbow :as rb]))
+            [pyrexia.rainbow :as rb]
+            [reagent.core :as r]))
 
 (defn weighted-average [values]
   (let [distances (seq (map :distance values))
@@ -54,7 +55,7 @@
         imageHeight 618
         boxWidth (/ imageWidth gridSize)
         boxHeight (/ imageHeight gridSize)
-        values (-> (:nodes @app-state) vals)
+        values (-> (:nodes @c/app-state) vals)
         temp (seq (temp-for-locations))
         grid (apply merge
                     (for
@@ -67,8 +68,21 @@
         maxTemp (apply max (vals grid))]
     [:svg {:width imageWidth
            :height imageHeight}
-     [:image {:x 0 :y 0 :width imageWidth :height imageHeight "xlinkHref" "map.png"}]]))
+     [:image {:x 0 :y 0 :width imageWidth :height imageHeight "xlinkHref" "map.png"}]]
+     ; (doall
+     ;  (for [key (keys grid)
+     ;        :let [value (get grid key)
+     ;              x (first key)
+     ;              y (second key)]]
+     ;    (do
+     ;      (set! (.-fillStyle context) (valueColour (:average value)))
+     ;      ;(.log js/console "colour" (:average value) (valueColour (:average value)))
+     ;      (set! (.-globalAlpha context) (:blend value))
+     ;      (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))
+))
+
+(def map-dom
+  (.getElementById js/document "map"))
 
 (def render-map
-  (r/render [draw-map]
-            (.getElementById js/document "map")))
+  (r/render [draw-map] map-dom))

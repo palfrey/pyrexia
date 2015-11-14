@@ -5,7 +5,6 @@
    [goog.events :as events]
    [cljs-time.core :as time]
    [cljs-time.format :as tf]
-   [reagent.core :as r]
    [pyrexia.common :as c]
    [pyrexia.colour-line :as cl]
    [pyrexia.rainbow :as rb]
@@ -62,8 +61,7 @@
            nodes (map (keyword "_source") nodes)]
        (.log js/console "parsed" nodes)
        (doseq [node nodes]
-         (swap! c/app-state assoc-in [:locations (:node node)] [(:x node) (:y node)]))
-       (map/draw-map map/canvas-dom (:map @c/app-state))))
+         (swap! c/app-state assoc-in [:locations (:node node)] [(:x node) (:y node)]))))
    (fn [data]
      (if (= (get data "status") 404)
        (do
