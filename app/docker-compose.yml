@@ -9,7 +9,6 @@ logstash:
     - ./logstash/config:/etc/logstash/conf.d
   links:
     - elasticsearch
-    - rabbitmq
 pyrexia:
   build: pyrexia/
   ports:
