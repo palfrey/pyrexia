@@ -40,9 +40,6 @@
                                    :optimizations :advanced
                                    :pretty-print false}}]}
 
-  :figwheel {
-             :css-dirs ["resources/public/css"] ;; watch and update CSS
-
-             ;; if you want to disable the REPL
-             :repl false
+  :figwheel {:css-dirs ["resources/public/css"] ;; watch and update CSS
+             :repl false ;; disable the REPL
 })
