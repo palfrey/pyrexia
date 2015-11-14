@@ -8,7 +8,7 @@
   (+ x (/ (- y x) 2)))
 
 (defn temp-format [val]
-    (gstring/format "%.1f" val))
+  (if (nil? val) "" (gstring/format "%.1f" val)))
 
 (defn- colours-view []
   (let [colour-count 20
