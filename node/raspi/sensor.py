@@ -8,9 +8,12 @@ LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
 LOGGER = logging.getLogger(__name__)
 
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+
 try:
 	import Adafruit_DHT
 except ImportError:
+	LOGGER.warning("Using Fake sensor")
 	class Adafruit_DHT(object):
 		@staticmethod
 		def read(sensor, pin):
@@ -310,7 +313,6 @@ class NodePublisher(object):
         LOGGER.info('Stopped')
 
 def main():
-    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
     LOGGER.info("This is %s" % config.NODE_ID)
     example = NodePublisher()
