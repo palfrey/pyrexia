@@ -35,13 +35,16 @@
    log "PUT" nil {}
    callback error-callback))
 
+(defn min-skip-null [& values]
+  (apply min (filter #(-> % nil? not) values)))
+
 (defn parse-nodes [node-data node-key]
   (let [buckets (-> node-data :aggregations :group_by_state :buckets)
         nodes (apply merge (map #(hash-map (:key %) (-> % :top_tag_hits :hits :hits first :_source)) buckets))]
     (.log js/console "nodes" (pr-str nodes))
     (swap! c/app-state assoc node-key nodes)
     (swap! c/app-state assoc :nodes (merge (:old-nodes @c/app-state) (:new-nodes @c/app-state)))
-    (swap! c/app-state assoc :minValue (apply min (map :temp (vals (:nodes @c/app-state)))))
+    (swap! c/app-state assoc :minValue (apply min-skip-null (map :temp (vals (:nodes @c/app-state)))))
     (.log js/console "minValue" (:minValue @c/app-state))
     (swap! c/app-state assoc :maxValue (apply max (map :temp (vals (:nodes @c/app-state)))))
     (.log js/console "maxValue" (:maxValue @c/app-state))
