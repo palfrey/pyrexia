@@ -1,3 +1,6 @@
+## The following requirements were added by pip --freeze:
+netaddr==0.7.18
+netifaces==0.10.4
 pika==0.10.0
 setuptools>=4.0.1
 -e git://github.com/adafruit/Adafruit_Python_DHT.git@9e8109bb4ab5ec9127e53e792c1f69eddfd2f687#egg=Adafruit_DHT
