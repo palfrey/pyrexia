@@ -76,9 +76,9 @@
     (.log js/console "nodes" (pr-str nodes))
     (swap! c/app-state assoc node-key nodes)
     (swap! c/app-state assoc :nodes (merge (:old-nodes @c/app-state) (:new-nodes @c/app-state)))
-    (swap! c/app-state assoc :minValue (apply min-skip-null (map :temp (vals (:nodes @c/app-state)))))
+    (swap! c/app-state assoc :minValue (apply min-skip-null (map #(-> % :temp js/parseInt) (vals (:nodes @c/app-state)))))
     (.log js/console "minValue" (:minValue @c/app-state))
-    (swap! c/app-state assoc :maxValue (apply max (map :temp (vals (:nodes @c/app-state)))))
+    (swap! c/app-state assoc :maxValue (apply max (map #(-> % :temp js/parseInt) (vals (:nodes @c/app-state)))))
     (.log js/console "maxValue" (:maxValue @c/app-state))
     (map/draw-map map/canvas-dom (:map @c/app-state))))
 
