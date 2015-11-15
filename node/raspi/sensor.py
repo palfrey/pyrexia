@@ -238,7 +238,13 @@ class NodePublisher(object):
         humidity, temperature = Adafruit_DHT.read(Adafruit_DHT.AM2302, config.PIN)
         if temperature == None:
             LOGGER.warn("Can't get temperature properly currently")
-        message = {"temp" : temperature, "humid" : humidity, "id": config.NODE_ID}
+
+	def data_format(value):
+            if value == None:
+                return None
+	    return "%.1f" % value
+
+        message = {"temp" : data_format(temperature), "humid" : data_format(humidity), "id": config.NODE_ID}
         properties = pika.BasicProperties(app_id=config.NODE_ID,
                                           content_type='text/plain')
         self._channel.basic_publish('', self.ROUTING_KEY,
