@@ -19,7 +19,39 @@
   ;; your application
   (swap! c/app-state update-in [:__figwheel_counter] inc))
 
-(def search-query "{\"size\":0,\"aggs\":{\"group_by_state\":{\"terms\":{\"field\":\"id\"},\"aggs\":{\"top_tag_hits\":{\"top_hits\":{\"sort\":[{\"@timestamp\":{\"order\":\"desc\"}}],\"size\":1}}}}}}")
+(def search-query "{
+  \"size\": 0,
+  \"aggs\": {
+    \"not_null_temp\": {
+      \"filter\": {
+        \"exists\": {
+          \"field\": \"temp\"
+        }
+      },
+      \"aggs\": {
+        \"group_by_state\": {
+          \"terms\": {
+            \"field\": \"id\"
+          },
+          \"aggs\": {
+            \"top_tag_hits\": {
+              \"top_hits\": {
+                \"sort\": [
+                  {
+                    \"@timestamp\": {
+                      \"order\": \"desc\"
+                    }
+                  }
+                ],
+                \"size\": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}")
 
 (def logstashFormatter (tf/formatter "yyyy.MM.dd"))
 (defn logName [date]
@@ -39,7 +71,7 @@
   (apply min (filter #(-> % nil? not) values)))
 
 (defn parse-nodes [node-data node-key]
-  (let [buckets (-> node-data :aggregations :group_by_state :buckets)
+  (let [buckets (-> node-data :aggregations :not_null_temp :group_by_state :buckets)
         nodes (apply merge (map #(hash-map (:key %) (-> % :top_tag_hits :hits :hits first :_source)) buckets))]
     (.log js/console "nodes" (pr-str nodes))
     (swap! c/app-state assoc node-key nodes)
