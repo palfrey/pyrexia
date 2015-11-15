@@ -240,9 +240,7 @@ class NodePublisher(object):
             LOGGER.warn("Can't get temperature properly currently")
         message = {"temp" : temperature, "humid" : humidity, "id": config.NODE_ID}
         properties = pika.BasicProperties(app_id=config.NODE_ID,
-                                          content_type='text/json',
-                                          headers=message)
-
+                                          content_type='text/plain')
         self._channel.basic_publish('', self.ROUTING_KEY,
                                     json.dumps(message, ensure_ascii=False),
                                     properties)
