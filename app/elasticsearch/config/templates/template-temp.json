@@ -1,16 +1,22 @@
 {
-  "template": "temperature-*",
-  "settings": {
-    "number_of_shards": 5
-  },
-  "mappings": {
-    "temp": {
-      "properties": {
-        "id": {
-          "type": "string",
-          "index": "not_analyzed"
+    "template": "temperature-*",
+    "settings": {
+        "number_of_shards": 5
+    },
+    "mappings": {
+        "sensor": {
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },
+                "temp": {
+                    "type": "double"
+                },
+                "humid": {
+                    "type": "double"
+                }
+            }
         }
-      }
     }
-  }
 }
