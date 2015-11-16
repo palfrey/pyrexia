@@ -4,6 +4,7 @@ import pika
 import json
 import config
 import netifaces, netaddr
+import sys, time
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
@@ -333,13 +334,18 @@ class NodePublisher(object):
         LOGGER.info('Stopped')
 
 def main():
-
     LOGGER.info("This is %s" % config.NODE_ID)
-    example = NodePublisher()
-    try:
-        example.run()
-    except KeyboardInterrupt:
-        example.stop()
+    while True:
+	    example = NodePublisher()
+	    try:
+		example.run()
+	    except KeyboardInterrupt:
+		example.stop()
+                sys.exit(-1)
+            except Exception,e:
+                LOGGER.error("Error in sensor node: %s" % e)
+                LOGGER.error("Restarting in 5 seconds...")
+                time.sleep(5)
 
 if __name__ == '__main__':
     main()
