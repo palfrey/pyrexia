@@ -17,3 +17,6 @@ open("node/raspi/config.py", "w").write(template.render(conf))
 
 template = env.get_template('node/raspi/init-script.template')
 open("node/raspi/init-script", "w").write(template.render(conf))
+
+template = env.get_template('node/nodemcu/config.json.template')
+open("node/nodemcu/config.json", "w").write(template.render(conf))
