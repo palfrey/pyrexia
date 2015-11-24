@@ -12,6 +12,6 @@ input {
 output {
 	elasticsearch {
 		index => "temperature-%{+YYYY.MM.dd}"
-		index_type => "temp"
+		index_type => "sensor"
 	}
 }

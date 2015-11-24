@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 import logging
 import pika
 import json
 import config
+import netifaces, netaddr
+import sys, time
 
 LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
               '-35s %(lineno) -5d: %(message)s')
@@ -11,16 +13,16 @@ LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 try:
-	import Adafruit_DHT
+     import Adafruit_DHT
 except ImportError:
-	LOGGER.warning("Using Fake sensor")
-	class Adafruit_DHT(object):
-		@staticmethod
-		def read(sensor, pin):
-			LOGGER.info("reading from fake sensor and pin %d" % pin)
-			return 20, 60
+     LOGGER.warning("Using Fake sensor")
+     class Adafruit_DHT(object):
+          @staticmethod
+          def read(sensor, pin):
+               LOGGER.info("reading from fake sensor and pin %d" % pin)
+               return 20, 60
 
-		AM2302 = 1
+          AM2302 = 1
 
 class NodePublisher(object):
     PUBLISH_INTERVAL = 5
@@ -238,11 +240,28 @@ class NodePublisher(object):
         humidity, temperature = Adafruit_DHT.read(Adafruit_DHT.AM2302, config.PIN)
         if temperature == None:
             LOGGER.warn("Can't get temperature properly currently")
-        message = {"temp" : temperature, "humid" : humidity, "id": config.NODE_ID}
-        properties = pika.BasicProperties(app_id=config.NODE_ID,
-                                          content_type='text/json',
-                                          headers=message)
 
+        def data_format(value):
+            if value == None:
+                return None
+            return "%.1f" % value
+
+        ifaces = [netifaces.ifaddresses(intf) for intf in netifaces.interfaces()]
+        addresses = []
+        for iface in ifaces:
+            if netifaces.AF_INET not in iface:
+                continue
+            addresses.extend([addr['addr'] for addr in iface[netifaces.AF_INET]])
+        addresses = [str(ip) for ip in [netaddr.IPAddress(x) for x in addresses] if ip.is_unicast() and not ip.is_reserved()]
+
+        message = {
+            "temp" : data_format(temperature),
+            "humid" : data_format(humidity),
+            "id": config.NODE_ID,
+            "addresses": addresses
+        }
+        properties = pika.BasicProperties(app_id=config.NODE_ID,
+                                          content_type='text/plain')
         self._channel.basic_publish('', self.ROUTING_KEY,
                                     json.dumps(message, ensure_ascii=False),
                                     properties)
@@ -315,13 +334,18 @@ class NodePublisher(object):
         LOGGER.info('Stopped')
 
 def main():
-
     LOGGER.info("This is %s" % config.NODE_ID)
-    example = NodePublisher()
-    try:
-        example.run()
-    except KeyboardInterrupt:
-        example.stop()
+    while True:
+	    example = NodePublisher()
+	    try:
+		example.run()
+	    except KeyboardInterrupt:
+		example.stop()
+                sys.exit(-1)
+            except Exception,e:
+                LOGGER.error("Error in sensor node: %s" % e)
+                LOGGER.error("Restarting in 5 seconds...")
+                time.sleep(5)
 
 if __name__ == '__main__':
     main()

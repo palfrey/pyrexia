@@ -1,0 +1,8 @@
+{
+	"password":"YOUR_WIFI_PASSWORD",
+	"ssid":"YOUR_WIFI_SSID",
+	"mqttHost":"{{ host }}",
+	"mqttUser":"{{ vhost }}:{{ user }}",
+	"mqttPassword": "{{ password }}",
+	"mqttPort": {{ port }}
+}
