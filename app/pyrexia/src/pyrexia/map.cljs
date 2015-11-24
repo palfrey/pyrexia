@@ -15,7 +15,7 @@
 (defn alpha-blend [values]
   (let [distances (map :distance values)
         minDistance (apply min distances)
-        fudgeFactor 200.0]
+        fudgeFactor 80.0]
     (if (= (count distances) 0)
       0.0 ; means that we don't wipe the map when there's no items
       (min 0.5 (/ 1.0 (/ minDistance fudgeFactor))))))
