@@ -53,8 +53,8 @@
   (let [gridSize 20
         imageWidth 600
         imageHeight 618
-        boxWidth (/ imageWidth gridSize)
-        boxHeight (/ imageHeight gridSize)
+        boxWidth (Math/round (/ imageWidth gridSize))
+        boxHeight (Math/round (/ imageHeight gridSize))
         values (-> (:nodes @c/app-state) vals)
         temp (seq (temp-for-locations))
         grid (apply merge
@@ -68,18 +68,19 @@
         maxTemp (apply max (vals grid))]
     [:svg {:width imageWidth
            :height imageHeight}
-     [:image {:x 0 :y 0 :width imageWidth :height imageHeight "xlinkHref" "map.png"}]]
-     ; (doall
-     ;  (for [key (keys grid)
-     ;        :let [value (get grid key)
-     ;              x (first key)
-     ;              y (second key)]]
-     ;    (do
-     ;      (set! (.-fillStyle context) (valueColour (:average value)))
-     ;      ;(.log js/console "colour" (:average value) (valueColour (:average value)))
-     ;      (set! (.-globalAlpha context) (:blend value))
-     ;      (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))
-))
+     [:image {:x 0 :y 0 :width imageWidth :height imageHeight :xlinkHref "map.png"}]
+     (doall
+      (for [key (keys grid)
+            :let [value (get grid key)
+                  x (first key)
+                  y (second key)]]
+        [:rect {:x (* x boxWidth)
+                :y (* y boxHeight)
+                :width boxWidth
+                :height boxHeight
+                :style {:fill-opacity (:blend value)
+                        :fill (valueColour (:average value))
+                        :stroke-width 0}}]))]))
 
 (def map-dom
   (.getElementById js/document "map"))
