@@ -66,6 +66,7 @@
                               :blend (alpha-blend rangeVals)}}))
         minTemp (apply min (vals grid))
         maxTemp (apply max (vals grid))]
+    (swap! c/app-state assoc :mapWidth imageWidth)
     [:svg {:width imageWidth
            :height imageHeight}
      [:image {:x 0 :y 0 :width imageWidth :height imageHeight :xlinkHref "map.png"}]

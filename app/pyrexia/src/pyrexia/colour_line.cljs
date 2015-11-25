@@ -12,7 +12,7 @@
 
 (defn- colours-view []
   (let [colour-count 20
-        colour-width (.-width (:map @c/app-state))
+        colour-width (:mapWidth @c/app-state)
         box-width (/ colour-width colour-count)
         bar-height 30
         rainbow-count (count rb/rainbow)
