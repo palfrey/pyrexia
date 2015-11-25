@@ -75,6 +75,7 @@
             :let [value (get grid key)
                   x (first key)
                   y (second key)]]
+        ^{:key (keyword (str x "," y))}
         [:rect {:x (* x boxWidth)
                 :y (* y boxHeight)
                 :width boxWidth
