@@ -336,16 +336,16 @@ class NodePublisher(object):
 def main():
     LOGGER.info("This is %s" % config.NODE_ID)
     while True:
-	    example = NodePublisher()
-	    try:
-		example.run()
-	    except KeyboardInterrupt:
-		example.stop()
-                sys.exit(-1)
-            except Exception,e:
-                LOGGER.error("Error in sensor node: %s" % e)
-                LOGGER.error("Restarting in 5 seconds...")
-                time.sleep(5)
+        example = NodePublisher()
+        try:
+            example.run()
+        except KeyboardInterrupt:
+            example.stop()
+            sys.exit(-1)
+        except Exception,e:
+            LOGGER.error("Error in sensor node: %s" % e)
+            LOGGER.error("Restarting in 5 seconds...")
+            time.sleep(5)
 
 if __name__ == '__main__':
     main()
