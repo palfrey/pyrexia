@@ -1,6 +1,7 @@
 (ns pyrexia.map
   (:require [pyrexia.common :as c]
-            [pyrexia.rainbow :as rb]))
+            [pyrexia.rainbow :as rb]
+            [reagent.core :as r]))
 
 (defn weighted-average [values]
   (let [distances (seq (map :distance values))
@@ -48,13 +49,12 @@
                 index (min (int (* (- 1.0 position) rainbowSize)) (- rainbowSize 1))]
             (rb/rgb (nth rb/rainbow index)))))
 
-(defn draw-map [canvas mapImage]
-  (let [context (.getContext canvas "2d")
-        gridSize 20
-        imageWidth (.-width mapImage)
-        imageHeight (.-height mapImage)
-        boxWidth (/ imageWidth gridSize)
-        boxHeight (/ imageHeight gridSize)
+(defn draw-map []
+  (let [gridSize 20
+        imageWidth 600
+        imageHeight 618
+        boxWidth (Math/round (/ imageWidth gridSize))
+        boxHeight (Math/round (/ imageHeight gridSize))
         values (-> (:nodes @c/app-state) vals)
         temp (seq (temp-for-locations))
         grid (apply merge
@@ -66,37 +66,26 @@
                               :blend (alpha-blend rangeVals)}}))
         minTemp (apply min (vals grid))
         maxTemp (apply max (vals grid))]
-    (set! (.-width canvas) imageWidth)
-    (set! (.-height canvas) imageHeight)
-    (.log js/console "image" imageWidth imageHeight)
-    (.drawImage context mapImage 0 0)
+    (swap! c/app-state assoc :mapWidth imageWidth)
+    [:svg {:width imageWidth
+           :height imageHeight}
+     [:image {:x 0 :y 0 :width imageWidth :height imageHeight :xlinkHref "map.png"}]
+     (doall
+      (for [key (keys grid)
+            :let [value (get grid key)
+                  x (first key)
+                  y (second key)]]
+        ^{:key (keyword (str x "," y))}
+        [:rect {:x (* x boxWidth)
+                :y (* y boxHeight)
+                :width boxWidth
+                :height boxHeight
+                :style {:fill-opacity (:blend value)
+                        :fill (valueColour (:average value))
+                        :stroke-width 0}}]))]))
 
-    (doall
-     (for [key (keys grid)
-           :let [value (get grid key)
-                 x (first key)
-                 y (second key)]]
-       (do
-         (set! (.-fillStyle context) (valueColour (:average value)))
-           ;(.log js/console "colour" (:average value) (valueColour (:average value)))
-         (set! (.-globalAlpha context) (:blend value))
-         (.fillRect context (* x boxWidth) (* y boxHeight) boxWidth boxHeight))))
+(def map-dom
+  (.getElementById js/document "map"))
 
-      ; (set! (.-fillStyle context) "#000000")
-      ; (set! (.-globalAlpha context) 1.0)
-      ; (doall
-      ;  (for [[x y] (-> @c/app-state :locations vals)]
-      ;    (.fillRect context x y boxWidth boxHeight)))
-  	;
-))
-
-(def canvas-dom (.getElementById js/document "map"))
-
-(defonce map-image
-  (let [img (js/Image.)]
-    (set! (.-src img) "map.png")
-    (set! (.-onload img)
-          (fn [e]
-            (swap! c/app-state assoc :map (.-target e))
-            (draw-map canvas-dom (:map @c/app-state))))
-    img))
+(def render-map
+  (r/render [draw-map] map-dom))

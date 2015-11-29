@@ -5,7 +5,6 @@
    [goog.events :as events]
    [cljs-time.core :as time]
    [cljs-time.format :as tf]
-   [reagent.core :as r]
    [pyrexia.common :as c]
    [pyrexia.colour-line :as cl]
    [pyrexia.rainbow :as rb]
@@ -79,8 +78,7 @@
     (swap! c/app-state assoc :minValue (apply min-skip-null (map #(-> % :temp js/parseFloat) (vals (:nodes @c/app-state)))))
     (.log js/console "minValue" (:minValue @c/app-state))
     (swap! c/app-state assoc :maxValue (apply max (map #(-> % :temp js/parseFloat) (vals (:nodes @c/app-state)))))
-    (.log js/console "maxValue" (:maxValue @c/app-state))
-    (map/draw-map map/canvas-dom (:map @c/app-state))))
+    (.log js/console "maxValue" (:maxValue @c/app-state))))
 
 (defn fetch-events []
   (retrieve-search (logName (time/now)) search-query #(parse-nodes (-> % keywordize-keys) :new-nodes) #())
@@ -95,8 +93,7 @@
            nodes (map (keyword "_source") nodes)]
        (.log js/console "parsed" nodes)
        (doseq [node nodes]
-         (swap! c/app-state assoc-in [:locations (:node node)] [(:x node) (:y node)]))
-       (map/draw-map map/canvas-dom (:map @c/app-state))))
+         (swap! c/app-state assoc-in [:locations (:node node)] [(:x node) (:y node)]))))
    (fn [data]
      (if (= (get data "status") 404)
        (do
