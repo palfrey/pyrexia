@@ -1,0 +1,14 @@
+digraph archictecture {
+	NodeMCU
+	RaspberryPi
+	RabbitMQ
+	Logstash
+	Elasticsearch
+	Pyrexia
+
+	NodeMCU -> RabbitMQ [label = "MQTT"]
+	RaspberryPi -> RabbitMQ [label = "AMQP"]
+	RabbitMQ -> Logstash
+	Logstash -> Elasticsearch
+	Elasticsearch -> Pyrexia [label = "HTTP"]
+}
