@@ -1,10 +1,6 @@
-# pyrexia
+# Pyrexia
 
-FIXME: Write a one-line description of your library/project.
-
-## Overview
-
-FIXME: Write a paragraph about the library/project and highlight its goals.
+IoT temperature sensor display
 
 ## Setup
 
@@ -30,10 +26,14 @@ To create a production build run:
     lein cljsbuild once min
 
 And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL. 
+get live reloading, nor a REPL.
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2015 Tom Parker
 
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
+Distributed under the AGPL version 3
+
+## FAQ
+
+If you're on OS X, ``ES_HOST=`docker-machine ip dev` lein figwheel`` (replace "dev" as appropriate for your docker-machine config) is probably the command you want to run instead...
