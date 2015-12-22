@@ -3,3 +3,5 @@ logstash.conf
 config.json
 node/create_msg.py
 ENV/
+nodes/
+src/
