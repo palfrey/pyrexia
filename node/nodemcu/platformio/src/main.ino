@@ -7,6 +7,8 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include "DHT.h"
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
