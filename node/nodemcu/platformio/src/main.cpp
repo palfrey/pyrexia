@@ -118,8 +118,14 @@ void loop()
 
 	StaticJsonBuffer<200> jsonBuffer;
 	JsonObject& root = jsonBuffer.createObject();
-	root["temp"] = t;
-	root["humid"] = h;
+	if (isnan(t))
+		root["temp"] = NULL;
+	else
+		root["temp"] = t;
+	if (isnan(h))
+		root["humid"] = NULL;
+	else
+		root["humid"] = h;
 	root["id"] = name;
 
 	char buffer[256];
