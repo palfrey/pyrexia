@@ -1,6 +1,6 @@
 {
-	"WIFI_PASSWORD":"YOUR_WIFI_PASSWORD",
-	"WIFI_SSID":"YOUR_WIFI_SSID",
+	"WIFI_PASSWORD":"{{ wifi_password }}",
+	"WIFI_SSID":"{{ wifi_ssid }}",
 	"MQTT_HOST":"{{ host }}",
 	"MQTT_USER":"{{ vhost }}:{{ user }}",
 	"MQTT_PASSWORD": "{{ password }}",

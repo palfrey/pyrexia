@@ -3,5 +3,7 @@
 	"vhost" : "/",
 	"user" : "guest",
 	"password" : "guest",
-	"port": 1883
+	"port": 1883,
+	"wifi_ssid": "YOUR_WIFI_SSID",
+	"wifi_password": "YOUR_WIFI_PASSWORD"
 }
