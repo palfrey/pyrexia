@@ -1,9 +1,4 @@
-/**
- * Blink
- *
- * Turns on an LED on for one second,
- * then off for one second, repeatedly.
- */
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include "DHT.h"
@@ -18,31 +13,49 @@ DHT dht(DHTPIN, DHTTYPE);
 
 const char* ssid = "******";
 const char* password = "******";
+bool connected = false;
 
 void setup()
 {
-  // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
   WiFi.begin(ssid, password);
-  Serial.println("");
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    break;
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
   dht.begin();
 }
 
 void loop()
 {
+	wl_status_t status = WiFi.status();
+	switch (status) {
+		case WL_CONNECTED: // all good
+			break;
+		case WL_SCAN_COMPLETED:
+		case WL_IDLE_STATUS:
+			// in the process of connecting...
+			Serial.printf("Connecting to wifi (%d)\n", status);
+			delay(1000);
+			return;
+
+		case WL_DISCONNECTED:
+		case WL_NO_SSID_AVAIL:
+		case WL_CONNECT_FAILED:
+		case WL_CONNECTION_LOST:
+			// wait briefly, then have another go
+			Serial.printf("Problem connecting to wifi: %d\n", status);
+			delay(1000);
+			WiFi.begin(ssid, password);
+			return;
+		case WL_NO_SHIELD:
+			Serial.println("Can't find WiFi Shield!\n");
+			delay(5000);
+			return;
+	}
+
+    Serial.print("Connected to ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+
     // turn the LED on (HIGH is the voltage level)
     digitalWrite(LED_BUILTIN, HIGH);
 
