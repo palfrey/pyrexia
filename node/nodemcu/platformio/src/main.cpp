@@ -11,15 +11,13 @@
 // Setup a DHT22 instance
 DHT dht(DHTPIN, DHTTYPE);
 
-const char* ssid = "******";
-const char* password = "******";
 bool connected = false;
 
 void setup()
 {
 	pinMode(LED_BUILTIN, OUTPUT);
 	Serial.begin(115200);
-	WiFi.begin(ssid, password);
+	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 	dht.begin();
 }
 
@@ -33,7 +31,7 @@ void blink(int time) {
 void retryWifi() {
 	blink(1000);
 	connected = false;
-	WiFi.begin(ssid, password);
+	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 }
 
 void loop()
@@ -49,7 +47,7 @@ void loop()
 			return;
 
 		case WL_NO_SSID_AVAIL:
-			Serial.printf("Problem connecting to wifi: can't find SSID %s\n", ssid);
+			Serial.printf("Problem connecting to wifi: can't find SSID " WIFI_SSID "\n");
 			retryWifi();
 			return;
 
@@ -68,7 +66,7 @@ void loop()
 
 	if (connected == false) {
 		Serial.print("Connected to ");
-		Serial.println(ssid);
+		Serial.println(WIFI_SSID);
 		Serial.print("IP address: ");
 		Serial.println(WiFi.localIP());
 		connected = true;
