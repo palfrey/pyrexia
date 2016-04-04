@@ -9,6 +9,8 @@
 #define DHTPIN 4
 #define DHTTYPE DHT22
 
+#define SECONDS_BETWEEN_READINGS 30
+
 // Setup a DHT22 instance
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -140,5 +142,5 @@ void loop()
 	if (isnan(h) || isnan(t)) {
 		Serial.println("Failed to read from DHT sensor!");
 	}
-	delay(5000);
+	delay(SECONDS_BETWEEN_READINGS * 1000);
 }
