@@ -15,6 +15,7 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 bool connected = false;
+unsigned long wifi_start_time;
 
 // Store the MQTT server, username, and password in flash memory.
 // This is required for using the Adafruit MQTT library.
@@ -34,6 +35,7 @@ void setup()
 	pinMode(LED_BUILTIN, OUTPUT);
 	Serial.begin(115200);
 	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+	wifi_start_time = millis();
 	dht.begin();
 
 	byte mac[6];
@@ -53,6 +55,7 @@ void retryWifi() {
 	blink(1000);
 	connected = false;
 	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+	wifi_start_time = millis();
 }
 
 void loop()
@@ -63,9 +66,18 @@ void loop()
 			break;
 		case WL_SCAN_COMPLETED:
 		case WL_IDLE_STATUS:
-			Serial.printf("Connecting to wifi (%d)\n", status);
-			blink(500);
+		{
+			unsigned long currentMillis = millis();
+			if (currentMillis - wifi_start_time >= 30*1000) {
+				Serial.printf("Been trying to connect for %ld seconds, restarting\n", (currentMillis - wifi_start_time)/1000);
+				retryWifi();
+			}
+			else {
+				Serial.printf("Connecting to wifi (%d)\n", status);
+				blink(500);
+			}
 			return;
+		}
 
 		case WL_NO_SSID_AVAIL:
 			Serial.printf("Problem connecting to wifi: can't find SSID " WIFI_SSID "\n");
