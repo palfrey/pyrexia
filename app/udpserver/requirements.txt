@@ -1,5 +1,5 @@
 ## The following requirements were added by pip --freeze:
-Twisted==19.2.1
+Twisted==19.7.0
 elasticsearch==1.9.0
 python-dateutil==2.4.2
 six==1.10.0
