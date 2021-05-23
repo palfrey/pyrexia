@@ -4,14 +4,25 @@
 #
 #    pip-compile requirements.in
 #
-bottle==0.12.9            # via platformio
-certifi==2019.6.16        # via requests
-chardet==3.0.4            # via requests
-click==5.1                # via platformio
-colorama==0.3.7           # via platformio
-idna==2.7                 # via requests
-lockfile==0.12.2          # via platformio
+bottle==0.12.19
+    # via platformio
+certifi==2019.6.16
+    # via requests
+chardet==3.0.4
+    # via requests
+click==5.1
+    # via platformio
+colorama==0.3.7
+    # via platformio
+idna==2.7
+    # via requests
+lockfile==0.12.2
+    # via platformio
 platformio==2.8.6
-pyserial==3.0.1           # via platformio
-requests==2.20.0          # via platformio
-urllib3==1.24.3           # via requests
+    # via -r requirements.in
+pyserial==3.0.1
+    # via platformio
+requests==2.20.0
+    # via platformio
+urllib3==1.24.3
+    # via requests
